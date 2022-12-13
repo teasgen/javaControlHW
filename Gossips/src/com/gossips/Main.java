@@ -219,10 +219,10 @@ public class Main {
                 case "about" -> {
                     System.out.println(
                             """
-                                    Автор: Смирнов Владислав, БПИ211
+                                    Автор: 	Смирнов Владислав, БПИ211
                                     Если Вы нашли ошибку или есть вопросы, то напишите мне
-                                    Телеграм: @teasgen
-                                    Почта: vmsmirnov@edu.hse.ru""");
+                                    Телеграм: 	@teasgen
+                                    Почта: 	vmsmirnov@edu.hse.ru""");
                 }
                 case "help" -> {
                     System.out.println("""
