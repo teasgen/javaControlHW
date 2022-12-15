@@ -27,7 +27,7 @@ public abstract class Gossip {
         this.type = type;
         this.isOk = true;
         this.m = m;
-        followers = new ArrayList<Gossip>();
+        followers = new ArrayList<>();
     }
 
     /**

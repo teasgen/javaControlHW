@@ -155,10 +155,9 @@ public class Main {
      * @param args console arguments
      */
     public static void main(String[] args) {
-        // int m = Integer.parseInt(args[0]);
-        int m = 2;
+        int m = Integer.parseInt(args[0]);
         Scanner sc = new Scanner(System.in);
-        ArrayList<Gossip> gossips = new ArrayList<Gossip>();
+        ArrayList<Gossip> gossips = new ArrayList<>();
         String actionType, name, type, message;
         System.out.println("""
                 Welcome to gossips area!!!
@@ -177,6 +176,13 @@ public class Main {
                     type = sc.next();
                     if (!allTypes.contains(type)) {
                         System.out.println("Error: unknown type " + type);
+                        continue;
+                    }
+                    boolean isNameAlreadyExists = false;
+                    for (var gossip : gossips)
+                        isNameAlreadyExists |= (gossip.getName().equals(name));
+                    if (isNameAlreadyExists) {
+                        System.out.println("Error: this name: '" + name + "' is already used");
                         continue;
                     }
                     gossips.add(createGossip(name, type, m));
@@ -220,9 +226,9 @@ public class Main {
                     System.out.println(
                             """
                                     Автор: Смирнов Владислав, БПИ211
-                                    Если Вы нашли ошибку или есть вопросы, то напишите мне
-                                    Телеграм: @teasgen
-                                    Почта: vmsmirnov@edu.hse.ru""");
+                                    Если Вы нашли ошибку или есть вопросы, то напишите мне:
+                                        Телеграм: @teasgen
+                                        Почта: vmsmirnov@edu.hse.ru""");
                 }
                 case "help" -> {
                     System.out.println("""

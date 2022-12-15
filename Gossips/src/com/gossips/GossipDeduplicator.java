@@ -2,6 +2,13 @@ package com.gossips;
 
 import java.util.ArrayList;
 
+/**
+ * Class of gossips with type Deduplicator
+ * Extends abstract class Gossip and must override its method sendMessage due to Homework description:
+ * Instance should print and send message without changes if only it has never ever received
+ * message with the similar text
+ * @author Vlad Smirnov
+ */
 public final class GossipDeduplicator extends Gossip {
     /**
      * {cntMessages}:       The number of received messages
@@ -32,13 +39,14 @@ public final class GossipDeduplicator extends Gossip {
      */
     @Override
     public void sendMessage(String message, ArrayList<Gossip> chain, Gossip parent) {
-        if (!this.isOk || receivedMessages.contains(message)) {
+        if (!this.isOk)
             return;
-        }
+        cntMessages = printMessageAndCheckCount(cntMessages, message, parent);
+        if (receivedMessages.contains(message))
+            return;
         receivedMessages.add(message);
 
         chain.add(this);
-        cntMessages = printMessageAndCheckCount(cntMessages, message, parent);
 
         for (var follower: followers) {
             if (!chain.contains(follower)) {
