@@ -1,6 +1,7 @@
-package com.gossips;
+package com.gossips.smirnov.vladislav;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Class of gossips with type Deduplicator
@@ -15,18 +16,18 @@ public final class GossipDeduplicator extends Gossip {
      * {receivedMessages}:  All messages, which instance has already got
      */
     private int cntMessages = 0;
-    private final ArrayList<String> receivedMessages;
+    private final HashSet<String> receivedMessages;
 
     /**
      * Constructor, which calls Gossip class constructor with taken params
      * Also it sets {receivedMessages} as an empty ArrayList
-     * @param name  gossips' name
-     * @param type  gossips' type
+     * @param name  gossip's name
+     * @param type  gossip's type
      * @param m     the maximum possible amount of given messages for this gossip
      */
     public GossipDeduplicator(String name, String type, int m) {
         super(name, type, m);
-        receivedMessages = new ArrayList<>();
+        receivedMessages = new HashSet<>();
     }
 
     /**

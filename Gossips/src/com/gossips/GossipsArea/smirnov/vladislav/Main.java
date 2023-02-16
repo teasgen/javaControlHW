@@ -1,9 +1,9 @@
-package com.gossips;
+package com.gossips.smirnov.vladislav;
 
 import java.util.*;
 
 /**
- * Class for convenient storage of a pair {gossips' name, order number}
+ * Class for convenient storage of a pair {gossip's name, order number}
  * @author Vlad Smirnov
  */
 class PairNameInx {
@@ -14,7 +14,7 @@ class PairNameInx {
     int index;
 
     /**
-     * Pair constructor, gets {gossips' name, order number} and copy this values accordingly
+     * Pair constructor, gets {gossip's name, order number} and copy this values accordingly
      * @param name name
      * @param x index
      */
@@ -67,11 +67,14 @@ class GossipComparator implements Comparator<Gossip> {
     }
 }
 
+/**
+ * Main class for program execution
+ */
 public class Main {
     /**
      * The public static array with all possible types of gossips
      */
-    public static final ArrayList<String> allTypes = new ArrayList<String>(
+    public static final ArrayList<String> allTypes = new ArrayList<>(
             Arrays.asList(
                     "null",
                     "censor",
@@ -83,8 +86,8 @@ public class Main {
 
     /**
      * Public static method, which creates Gossip with given name and type
-     * @param name gossips' name
-     * @param type gossips' type
+     * @param name gossip's name
+     * @param type gossip's type
      * @param m    the maximum possible amount of given messages for this gossip
      * @return     new Gossip according to {type}
      */
@@ -100,7 +103,7 @@ public class Main {
 
     /**
      * Public static method for getting index by given name
-     * @param name      gossips' name
+     * @param name      gossip's name
      * @param gossips   current array of gossips
      * @return          the order number of gossip with name {name}
      */
@@ -114,12 +117,22 @@ public class Main {
 
     /**
      * Prints error: unknown name
-     * @param name gossips' name
+     * @param name gossip's name
      */
     public static void unknownName(String name) {
         System.out.println("Error: unknown gossip " + name);
     }
 
+    /**
+     * Checks whether scanner can read next
+     * @return In positive case {true}, otherwise {false} and prints Error
+     */
+    public static boolean checkNextAndThrowBadCommand(Scanner sc) {
+        if (sc.hasNext())
+            return true;
+        System.out.println("Error: bad command structure, please check spelling or write help");
+        return false;
+    }
     /**
      * This public static method reads two names, check if they exist
      * In positive case returns structure, contains scanned names and corresponding indexes
@@ -129,19 +142,18 @@ public class Main {
      */
     public static PairID readLink(Scanner sc, ArrayList<Gossip> gossips) {
         String name1, name2;
+        if (!checkNextAndThrowBadCommand(sc))  return null;
         name1 = sc.next();
+        if (!checkNextAndThrowBadCommand(sc))  return null;
         name2 = sc.next();
         int inxName1 = getIndexOfGossipByName(name1, gossips);
         int inxName2 = getIndexOfGossipByName(name2, gossips);
-        if (inxName1 == -1) {
+        if (inxName1 == -1)
             unknownName(name1);
-        }
-        if (inxName2 == -1) {
+        else if (inxName2 == -1)
             unknownName(name2);
-        }
-        if (inxName1 == inxName2) {
+        else if (inxName1 == inxName2)
             System.out.println("Error: gossip can't subscribe to herself");
-        }
         return new PairID(new PairNameInx(name1, inxName1), new PairNameInx(name2, inxName2));
     }
 
@@ -155,7 +167,15 @@ public class Main {
      * @param args console arguments
      */
     public static void main(String[] args) {
-        int m = Integer.parseInt(args[0]);
+        int m = 2;
+//        try {
+//            m = Integer.parseInt(args[0]);
+//            if (m < 0)
+//                throw new Exception();
+//        } catch (Exception e) {
+//            System.out.println("Bad console argument, expected int");
+//            return;
+//        }
         Scanner sc = new Scanner(System.in);
         ArrayList<Gossip> gossips = new ArrayList<>();
         String actionType, name, type, message;
@@ -163,43 +183,47 @@ public class Main {
                 Welcome to gossips area!!!
                 Good luck!
                 Or write help, to get manual""");
-        for (;;) {
-            System.out.print("\n> ");
+        System.out.print("\n> ");
+        while (checkNextAndThrowBadCommand(sc)) {
             actionType = sc.next();
             switch (actionType) {
                 case "create" -> {
                     if (gossips.size() == 100) {
                         System.out.println("Can't create new gossip");
-                        continue;
+                        break;
                     }
+                    if (!checkNextAndThrowBadCommand(sc)) break;
                     name = sc.next();
+                    if (!checkNextAndThrowBadCommand(sc)) break;
                     type = sc.next();
                     if (!allTypes.contains(type)) {
                         System.out.println("Error: unknown type " + type);
-                        continue;
+                        break;
                     }
                     boolean isNameAlreadyExists = false;
                     for (var gossip : gossips)
                         isNameAlreadyExists |= (gossip.getName().equals(name));
                     if (isNameAlreadyExists) {
                         System.out.println("Error: this name: '" + name + "' is already used");
-                        continue;
+                        break;
                     }
                     gossips.add(createGossip(name, type, m));
                     System.out.println("Ok, " + name + " gossip created");
                 }
                 case "link" -> {
                     var nowLink = readLink(sc, gossips);
-                    if (nowLink.correct()) {
-                        if (gossips.get(nowLink.first.index).addFollower(gossips.get(nowLink.second.index)))
+                    if (nowLink != null && nowLink.correct()) {
+                        if (gossips.get(nowLink.first.index).addFollower(gossips.get(nowLink.second.index))) {
                             System.out.println("Ok, " + nowLink.second.name + " followed " + nowLink.first.name);
+                        }
                     }
                 }
                 case "unlink" -> {
                     var nowLink = readLink(sc, gossips);
-                    if (nowLink.correct()) {
-                        if (gossips.get(nowLink.first.index).removeFollower(gossips.get(nowLink.second.index)))
+                    if (nowLink != null && nowLink.correct()) {
+                        if (gossips.get(nowLink.first.index).removeFollower(gossips.get(nowLink.second.index))) {
                             System.out.println("Ok, " + nowLink.second.name + " unfollowed " + nowLink.first.name);
+                        }
                     }
                 }
                 case "gossips" -> {
@@ -209,18 +233,27 @@ public class Main {
                     }
                 }
                 case "listeners" -> {
+                    if (!checkNextAndThrowBadCommand(sc)) break;
                     name = sc.next();
                     int inx = getIndexOfGossipByName(name, gossips);
-                    if (inx == -1)
+                    if (inx == -1) {
                         unknownName(name);
+                    }
                     else {
                         gossips.get(inx).printListeners();
                     }
                 }
                 case "message" -> {
+                    if (!checkNextAndThrowBadCommand(sc)) break;
                     name = sc.next();
+                    if (!checkNextAndThrowBadCommand(sc)) break;
                     message = sc.next();
-                    gossips.get(getIndexOfGossipByName(name, gossips)).sendMessage(message, new ArrayList<>(), null);
+                    int inx = getIndexOfGossipByName(name, gossips);
+                    if (inx == -1) {
+                        unknownName(name);
+                    } else {
+                        gossips.get(inx).sendMessage(message, new ArrayList<>(), null);
+                    }
                 }
                 case "about" -> {
                     System.out.println(
@@ -232,30 +265,45 @@ public class Main {
                 }
                 case "help" -> {
                     System.out.println("""
-                            1. create <name> <type> - создает сплетницу с именем name и типом type
+                            create <name> <type> - создает сплетницу с именем name и типом type
                                 Возможные типы:
-                                    null,
-                                    censor,
-                                    spammer,
-                                    simple,
-                                    deduplicator
+                                    censor:
+                                        Сплетница-цензор печатает все сообщения, но передает своим подписчикам
+                                        только те сообщения, где есть подстрока «Java», независимо от регистра
+                                    deduplicator:
+                                        Сплетница-deduplicator печатает и передает сообщения, которые не встречались
+                                        ей ранее. Уникальность сообщения определяется по его тексту
+                                    null:
+                                        Сплетница-null печатает полученные ею сообщения, но не передаёт их дальше
+                                    spammer:
+                                        Сплетница-спамер печатает полученное сообщение один раз, а передает
+                                        сообщение своим подписчикам от двух до пяти раз. Количество раз генерируется
+                                        случайно с помощью экземпляра класса java.util.Random
+                                    simple:
+                                        Сплетница-simple: печатает и передает сообщение слушателям без изменений.
+                                        
                             2. link <name1> <name2> - подписывает сплетницу name2 на сплетницу name1
+                            
                             3. unlink <name1> <name2> - отписывает сплетницу name2 от сплетницы name1
+                            
                             4. message <name> <message>" - отправляется сообщение message сплетнице name
+                            
                             5. gossips - печатает всех сплетниц в алфавитном порядке
+                            
                             6. listeners <name> - печатает имена всех слушателей сплетницы name в алфавитном порядке
+                            
                             7. about - об авторе
+                            
                             8. quit - выйти из приложения""");
                 }
                 case "quit" -> {
                     System.out.println("See you soon later!");
                     return;
                 }
-                default -> {
-                    System.out.println("It seems, I don't know command: '" + actionType + "', please check spelling or write help");
-                    sc.nextLine();
-                }
+                default -> System.out.println("It seems, I don't know command: '" + actionType + "', please check spelling or write help");
             }
+            sc.nextLine();
+            System.out.print("\n> ");
         }
     }
 }

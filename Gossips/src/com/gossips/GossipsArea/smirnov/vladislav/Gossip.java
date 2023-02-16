@@ -1,4 +1,4 @@
-package com.gossips;
+package com.gossips.smirnov.vladislav;
 import java.util.ArrayList;
 
 /**
@@ -9,7 +9,7 @@ public abstract class Gossip {
     /**
      * {isOk}:          Bool variable that shows whether gossip instance is currently available for communication
      * {followers}:     Array of all listeners
-     * {name, type}:    Gossips' name & type
+     * {name, type}:    gossip's name & type
      * {m}:             The maximum possible amount of given messages for this gossip
      */
     protected String name, type;
@@ -18,8 +18,8 @@ public abstract class Gossip {
     protected int m;
     /**
      * Constructor, which initialize fields due to taken params accordingly
-     * @param name  gossips' name
-     * @param type  gossips' type
+     * @param name  gossip's name
+     * @param type  gossip's type
      * @param m     the maximum possible amount of given messages for this gossip
      */
     public Gossip(String name, String type, int m) {
@@ -43,6 +43,10 @@ public abstract class Gossip {
      *         {false} otherwise, also program informs user about it
      */
     public boolean addFollower(Gossip newFollower) {
+        if (followers.size() == 10) {
+            System.out.println("Error: can't add new follower, because max limit reached");
+            return false;
+        }
         if (followers.contains(newFollower)) {
             System.out.println("Warning: " + newFollower.getName() + " is already followed " + this.getName());
             return false;
@@ -70,6 +74,8 @@ public abstract class Gossip {
      * Prints all listeners of the current instance
      */
     public void printListeners() {
+        if (followers.isEmpty())
+            System.out.println("Gossip '" + this.getName() + "' doesn't have any listeners");
         followers.sort(new GossipComparator());
         for (int i = 0; i < followers.size(); i++) {
             System.out.println("Listener " + (i + 1) + ": " + followers.get(i).getName());
@@ -104,7 +110,7 @@ public abstract class Gossip {
      * Abstract method, which describes what every gossip type should do, if it has got a message:
      *      1. check if instance is available for communication
      *      2. in positive case prints messages and add current instance to chain (to prevent infinite messages exchange)
-     *      3. sends message to all followers due to gossips' type
+     *      3. sends message to all followers due to gossip's type
      *<p>
      * @param message   message, which we should process
      * @param chain     array of gossips, who have already got this message

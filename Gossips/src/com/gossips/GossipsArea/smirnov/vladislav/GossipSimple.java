@@ -1,4 +1,4 @@
-package com.gossips;
+package com.gossips.smirnov.vladislav;
 
 import java.util.ArrayList;
 
@@ -16,8 +16,8 @@ public final class GossipSimple extends Gossip {
 
     /**
      * Constructor, which calls Gossip class constructor with taken params
-     * @param name  gossips' name
-     * @param type  gossips' type
+     * @param name  gossip's name
+     * @param type  gossip's type
      * @param m     the maximum possible amount of given messages for this gossip
      */
     public GossipSimple(String name, String type, int m) {

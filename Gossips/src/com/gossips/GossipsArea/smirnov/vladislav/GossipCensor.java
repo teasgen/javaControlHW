@@ -1,14 +1,14 @@
-package com.gossips;
+package com.gossips.smirnov.vladislav;
 
 import java.util.ArrayList;
 
 /**
- * Class of gossips with type Null
+ * Class of gossips with type Censor
  * Extends abstract class Gossip and must override its method sendMessage due to Homework description:
- * Instance should only print received message without changes
+ * Instance should print and send received message only if it contains 'Java' as a suabstring without case sensivity
  * @author Vlad Smirnov
  */
-public final class GossipNull extends Gossip {
+public final class GossipCensor extends Gossip {
     /**
      * {cntMessages}: The number of received messages
      */
@@ -16,16 +16,18 @@ public final class GossipNull extends Gossip {
 
     /**
      * Constructor, which calls Gossip class constructor with taken params
-     * @param name  gossips' name
-     * @param type  gossips' type
+     * @param name  gossip's name
+     * @param type  gossip's type
      * @param m     the maximum possible amount of given messages for this gossip
      */
-    public GossipNull(String name, String type, int m) {
+    public GossipCensor(String name, String type, int m) {
         super(name, type, m);
     }
-
+    
     /**
-     * If gossip is available for communication prints received message
+     * This method implements description in base class
+     * Program prints received message without changes
+     * If message contains 'java' (without case sensivity), program send it to followers 
      * @param message   message, which we should process
      * @param chain     array of gossips, who have already got this message
      * @param parent    gossip, from whom current instance got this message (null, if it doesn't exist)
@@ -35,6 +37,17 @@ public final class GossipNull extends Gossip {
         if (!this.isOk) {
             return;
         }
+
+        chain.add(this);
         cntMessages = printMessageAndCheckCount(cntMessages, message, parent);
+
+        if (message.toLowerCase().contains("java"))
+            return;
+
+        for (var follower: followers) {
+            if (!chain.contains(follower)) {
+                follower.sendMessage(message, new ArrayList<Gossip>(chain), this);
+            }
+        }
     }
 }
