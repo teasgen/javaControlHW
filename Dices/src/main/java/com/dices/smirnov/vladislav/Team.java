@@ -6,9 +6,11 @@ import java.util.Random;
 class Player extends Thread {
     private int score;
     private final String name;
+    private final String teamLabel;
     private final Random rnd = new Random();
-    Player(String playerName) {
+    Player(String playerName, String label) {
         name = playerName;
+        teamLabel = label;
     }
 
     @Override
@@ -25,48 +27,46 @@ class Player extends Thread {
 
     @Override
     public void run() {
-        synchronized (Main.getCroupier().getPlayersTeam(this)) {
-            System.out.println(name + " enter in sync: " + Main.getCroupier().getPlayersTeam(this));
+        synchronized (Main.croupier.getTeam(teamLabel)) {
+            System.out.println(name + " enter in sync: " + Main.croupier.getTeam(teamLabel));
             int currentScore = 0;
             for (int i = 0; i < 6; ++i) {
                 currentScore += rnd.nextInt(6) + 1;
             }
-            synchronized (Main.getCroupier().getResultTable()) {
-                Croupier croupier = Main.getCroupier();
+            synchronized (Main.croupier.getResultTable()) {
+                Croupier croupier = Main.croupier;
                 String teamLabel = croupier.getPlayersTeamLabel(this);
-                if (Main.getCroupier().getResultTable().containsKey(teamLabel)) {
+                if (Main.croupier.getResultTable().containsKey(teamLabel)) {
                     Integer teamScore = croupier.getResultTable().get(teamLabel);
                     teamScore += currentScore;
-                    Main.getCroupier().getResultTable().put(teamLabel, teamScore);
+                    Main.croupier.getResultTable().put(teamLabel, teamScore);
                 } else {
-                    Main.getCroupier().getResultTable().putIfAbsent(teamLabel, currentScore);
+                    Main.croupier.getResultTable().putIfAbsent(teamLabel, currentScore);
                 }
             }
             try {
-                Main.getCroupier().getPlayersTeam(this).wait(rnd.nextInt(100, 1001));
+                Main.croupier.getTeam(teamLabel).wait(rnd.nextInt(100, 1001));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             score += currentScore;
             System.out.println(name + " exit");
-            Main.getCroupier().getPlayersTeam(this).notify();
+            Main.croupier.getTeam(teamLabel).notify();
         }
     }
 }
 
-public record Team (
-    String label,
-    ArrayList<Player> squad
-){
-    public Team {
-        if (label == null)
-            throw new IllegalArgumentException("label == null");
+public class Team {
+    final String label;
+    final ArrayList<Player> squad = new ArrayList<>();
+    Team(String s) {
+        label = s;
     }
 
-    @Override
-    public String toString() {
-        return "Team{" +  "label='" + label + '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "Team{" +  "label='" + label + '}';
+//    }
 
     @Override
     public boolean equals(Object obj) {
