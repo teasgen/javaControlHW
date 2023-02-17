@@ -1,6 +1,7 @@
 package com.dices.smirnov.vladislav;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 class Player extends Thread {
@@ -25,18 +26,19 @@ class Player extends Thread {
         return name;
     }
 
+    public int getScore() { return score; }
+
     @Override
     public void run() {
         while (true) {
-            synchronized (Croupier.getTeam(teamLabel)) {
-                System.out.println(name + " enter at sync: " + Croupier.getTeam(teamLabel));
+            synchronized (Main.croupier.getTeam(teamLabel)) {
+                // System.out.println(name + " enter at sync: " + Main.croupier.getTeam(teamLabel));
                 int currentScore = 0;
                 for (int i = 0; i < 6; ++i) {
                     currentScore += rnd.nextInt(6) + 1;
                 }
-                synchronized (Main.croupier.getResultTable().) {
+                synchronized (Main.croupier.getResultTable()) {
                     Croupier croupier = Main.croupier;
-                    String teamLabel = croupier.getPlayersTeamLabel(this);
                     if (Main.croupier.getResultTable().containsKey(teamLabel)) {
                         Integer teamScore = croupier.getResultTable().get(teamLabel);
                         teamScore += currentScore;
@@ -46,25 +48,27 @@ class Player extends Thread {
                     }
                 }
                 score += currentScore;
-                System.out.println(name + " make move");
+                // System.out.println(name + " make move: " + score);
             }
             try {
-                System.out.println(name + " sleeping...");
-                Thread.sleep(1000);
-                System.out.println(name + " wake up!!!");
-                synchronized (Croupier.getTeam(teamLabel)) {
-                    Croupier.getTeam(teamLabel).wait();
+                // System.out.println(name + " sleeping...");
+                Thread.sleep(rnd.nextInt(100, 1001));
+                // System.out.println(name + " wake up!!!");
+                synchronized (Main.croupier.getTeam(teamLabel)) {
+                    Main.croupier.getTeam(teamLabel).wait();
                 }
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                return;
             }
         }
     }
 }
 
-public class Team extends Thread {
-    final String label;
-    final ArrayList<Player> squad = new ArrayList<>();
+public class Team {
+    private final String label;
+    private final List<Player> squad = new ArrayList<>();
+    public String getLabel() { return label; }
+    public List<Player> getSquad() { return squad; }
     Team(String s) {
         label = s;
     }
@@ -75,19 +79,9 @@ public class Team extends Thread {
     }
 
     @Override
-    public void run() {
-        while (!Thread.interrupted()) {
-            synchronized (this) {
-                this.notifyAll();
-            }
-        }
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj.getClass() != this.getClass())
             return false;
-        else // equals to another Team
-            return this.label.equals(((Team) obj).label);
+        return label.equals(((Team) obj).getLabel());
     }
 }
