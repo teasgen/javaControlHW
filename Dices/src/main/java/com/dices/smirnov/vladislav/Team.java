@@ -27,52 +27,64 @@ class Player extends Thread {
 
     @Override
     public void run() {
-        synchronized (Main.croupier.getTeam(teamLabel)) {
-            System.out.println(name + " enter in sync: " + Main.croupier.getTeam(teamLabel));
-            int currentScore = 0;
-            for (int i = 0; i < 6; ++i) {
-                currentScore += rnd.nextInt(6) + 1;
-            }
-            synchronized (Main.croupier.getResultTable()) {
-                Croupier croupier = Main.croupier;
-                String teamLabel = croupier.getPlayersTeamLabel(this);
-                if (Main.croupier.getResultTable().containsKey(teamLabel)) {
-                    Integer teamScore = croupier.getResultTable().get(teamLabel);
-                    teamScore += currentScore;
-                    Main.croupier.getResultTable().put(teamLabel, teamScore);
-                } else {
-                    Main.croupier.getResultTable().putIfAbsent(teamLabel, currentScore);
+        while (true) {
+            synchronized (Croupier.getTeam(teamLabel)) {
+                System.out.println(name + " enter at sync: " + Croupier.getTeam(teamLabel));
+                int currentScore = 0;
+                for (int i = 0; i < 6; ++i) {
+                    currentScore += rnd.nextInt(6) + 1;
                 }
+                synchronized (Main.croupier.getResultTable().) {
+                    Croupier croupier = Main.croupier;
+                    String teamLabel = croupier.getPlayersTeamLabel(this);
+                    if (Main.croupier.getResultTable().containsKey(teamLabel)) {
+                        Integer teamScore = croupier.getResultTable().get(teamLabel);
+                        teamScore += currentScore;
+                        Main.croupier.getResultTable().put(teamLabel, teamScore);
+                    } else {
+                        Main.croupier.getResultTable().putIfAbsent(teamLabel, currentScore);
+                    }
+                }
+                score += currentScore;
+                System.out.println(name + " make move");
             }
             try {
-                Main.croupier.getTeam(teamLabel).wait(rnd.nextInt(100, 1001));
+                System.out.println(name + " sleeping...");
+                Thread.sleep(1000);
+                System.out.println(name + " wake up!!!");
+                synchronized (Croupier.getTeam(teamLabel)) {
+                    Croupier.getTeam(teamLabel).wait();
+                }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            score += currentScore;
-            System.out.println(name + " exit");
-            Main.croupier.getTeam(teamLabel).notify();
         }
     }
 }
 
-public class Team {
+public class Team extends Thread {
     final String label;
     final ArrayList<Player> squad = new ArrayList<>();
     Team(String s) {
         label = s;
     }
 
-//    @Override
-//    public String toString() {
-//        return "Team{" +  "label='" + label + '}';
-//    }
+    @Override
+    public String toString() {
+        return "Team{" +  "label='" + label + '}';
+    }
+
+    @Override
+    public void run() {
+        while (!Thread.interrupted()) {
+            synchronized (this) {
+                this.notifyAll();
+            }
+        }
+    }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass().equals(String.class)) // equals to String by label
-            return this.label.equals(obj);
-
         if (obj.getClass() != this.getClass())
             return false;
         else // equals to another Team

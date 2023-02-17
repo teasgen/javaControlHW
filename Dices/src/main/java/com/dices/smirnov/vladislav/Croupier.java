@@ -3,13 +3,9 @@ package com.dices.smirnov.vladislav;
 import java.util.*;
 
 public class Croupier {
-    private final List<Team> teams = new ArrayList<>();
+    private static final List<Team> teams = new ArrayList<>();
     private final Map<String, Integer> resultTable = new HashMap<>();
     private final Map<String, String> playerTeam = new HashMap<>();
-    public Team getPlayersTeam(Player player) {
-        String teamLabel = playerTeam.get(player.getPlayerName());
-        return teams.get(teams.indexOf(new Team(teamLabel)));
-    }
     public void setPlayer(String teamLabel, String playerName) {
         teams.get(teams.indexOf(new Team(teamLabel))).squad.add(new Player(playerName, teamLabel));
         playerTeam.put(playerName, teamLabel);
@@ -18,7 +14,7 @@ public class Croupier {
         teams.add(new Team(label));
     }
 
-    public Team getTeam(String label) {
+    public static synchronized Team getTeam(String label) {
         for (Team team : teams) {
             if (team.label.equals(label))
                 return team;
