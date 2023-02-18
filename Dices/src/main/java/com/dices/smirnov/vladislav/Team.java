@@ -30,9 +30,9 @@ class Player extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             synchronized (Main.croupier.getTeam(teamLabel)) {
-                // System.out.println(name + " enter at sync: " + Main.croupier.getTeam(teamLabel));
+                // System.out.println(teamLabel + ", " + name + " enter at sync: ");
                 int currentScore = 0;
                 for (int i = 0; i < 6; ++i) {
                     currentScore += rnd.nextInt(6) + 1;
@@ -48,15 +48,15 @@ class Player extends Thread {
                     }
                 }
                 score += currentScore;
-                // System.out.println(name + " make move: " + score);
+                // System.out.println(teamLabel + ", " + name + " make move: " + score);
             }
             try {
-                // System.out.println(name + " sleeping...");
+                // System.out.println(teamLabel + ", " + name + " sleeping...");
                 Thread.sleep(rnd.nextInt(100, 1001));
-                // System.out.println(name + " wake up!!!");
-                synchronized (Main.croupier.getTeam(teamLabel)) {
-                    Main.croupier.getTeam(teamLabel).wait();
-                }
+                // System.out.println(teamLabel + ", " + name + " wake up!!!");
+                // synchronized (Main.croupier.getTeam(teamLabel)) {
+                //     Main.croupier.getTeam(teamLabel).wait();
+                //}
             } catch (InterruptedException e) {
                 return;
             }
