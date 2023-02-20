@@ -5,11 +5,15 @@ import java.util.*;
 public class Croupier {
     private final List<Team> teams = new ArrayList<>();
     private final Map<String, Integer> resultTable = new HashMap<>();
-    public void setPlayer(String teamLabel, String playerName) {
-        teams.get(teams.indexOf(new Team(teamLabel))).getSquad().add(new Player(playerName, teamLabel));
+    public Player setPlayer(String teamLabel, String playerName) {
+        Player player = new Player(playerName, teamLabel);
+        teams.get(teams.indexOf(new Team(teamLabel))).getSquad().add(player);
+        return player;
     }
-    public void setTeam(String label) {
-        teams.add(new Team(label));
+    public Team setTeam(String label) {
+        Team team = new Team(label);
+        teams.add(team);
+        return team;
     }
 
     public synchronized Team getTeam(String label) {

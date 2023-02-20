@@ -56,10 +56,10 @@ public class Main {
         }
     }
     public static void main(String[] args) {
-        if (args.length != 0) {
-            System.out.println("Wrong number of arguments");
-            return;
-        }
+//        if (args.length != 1) {
+//            System.out.println("Wrong number of arguments");
+//            return;
+//        }
         int t = 2;
 //        try {
 //            t = Integer.parseInt(args[0]);
@@ -71,12 +71,8 @@ public class Main {
             String teamName = generator.takeUniqueTeamName();
             croupier.setTeam(teamName);
             for (int j = 0; j < 3; ++j)
-                croupier.setPlayer(teamName, generator.takeUniquePlayerName());
+                croupier.setPlayer(teamName, generator.takeUniquePlayerName()).start();
         }
-        for (Team team : croupier.getTeams())
-            for (Player player : team.getSquad())
-                player.start();
-
         TimerTask printResultTableTask = new CroupierTimer();
         TimerTask endGameTask = new EndTimer(t);
         croupierTimer.schedule(printResultTableTask, new Date(), CROUPIER_REQUEST_TIME);
