@@ -10,10 +10,9 @@ public class Croupier {
         teams.get(teams.indexOf(new Team(teamLabel))).getSquad().add(player);
         return player;
     }
-    public Team setTeam(String label) {
+    public void setTeam(String label) {
         Team team = new Team(label);
         teams.add(team);
-        return team;
     }
 
     public synchronized Team getTeam(String label) {
