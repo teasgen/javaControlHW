@@ -5,9 +5,13 @@ import java.util.*;
 public class Croupier {
     private final List<Team> teams = new ArrayList<>();
     private final Map<String, Integer> resultTable = new HashMap<>();
-    public Player setPlayer(String teamLabel, String playerName) {
+    public Player setPlayer(String playerName, String teamLabel) {
         Player player = new Player(playerName, teamLabel);
-        teams.get(teams.indexOf(new Team(teamLabel))).getSquad().add(player);
+        try {
+            teams.get(teams.indexOf(new Team(teamLabel))).getSquad().add(player);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Team with label: " + teamLabel + " doesn't exist");
+        }
         return player;
     }
     public void setTeam(String label) {
@@ -20,7 +24,8 @@ public class Croupier {
             if (team.getLabel().equals(label))
                 return team;
         }
-        throw new IllegalArgumentException("Team with label: " + label + "doesn't exists");
+        System.out.println("Team with label: " + label + " doesn't exist");
+        return null;
     }
     public List<Team> getTeams() {
         return Collections.unmodifiableList(teams);
@@ -28,6 +33,11 @@ public class Croupier {
 
     public Map<String, Integer> getResultTable() {
         return resultTable;
+    }
+
+    public void clear() {
+        teams.clear();
+        resultTable.clear();
     }
 
     public List<String> findWinners() {

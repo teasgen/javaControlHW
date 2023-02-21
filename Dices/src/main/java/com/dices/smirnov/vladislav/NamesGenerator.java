@@ -1,7 +1,6 @@
 package com.dices.smirnov.vladislav;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class NamesGenerator {
     public final List<String> teamsNames = new ArrayList<>(
@@ -65,5 +64,9 @@ public class NamesGenerator {
     }
     public String takeUniquePlayerName() {
         return playersNames.get(indexesToChooseNew.get(playersNamesUsed++));
+    }
+    public void init() {
+        teamsNamesUsed = 0;
+        playersNamesUsed = 0;
     }
 }

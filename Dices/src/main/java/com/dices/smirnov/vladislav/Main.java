@@ -25,7 +25,6 @@ public class Main {
         @Override
         public void run() {
             System.out.println("The game ended");
-            // threadInvitePlayerToTheTable.interrupt();
             croupierTimer.cancel();
             endGameTimer.cancel();
             for (Team team : croupier.getTeams()) {
@@ -56,22 +55,23 @@ public class Main {
         }
     }
     public static void main(String[] args) {
-//        if (args.length != 1) {
-//            System.out.println("Wrong number of arguments");
-//            return;
-//        }
-        int t = 2;
-//        try {
-//            t = Integer.parseInt(args[0]);
-//        } catch (NumberFormatException e) {
-//            System.out.println("Incorrect number of teams!");
-//        }
+        if (args.length != 1) {
+            System.out.println("Wrong number of arguments");
+            return;
+        }
+        int t;
+        try {
+            t = Integer.parseInt(args[0]);
+        } catch (NumberFormatException e) {
+            System.out.println("Incorrect number of teams!");
+            return;
+        }
         NamesGenerator generator = new NamesGenerator();
         for (int i = 0; i < t; ++i) {
             String teamName = generator.takeUniqueTeamName();
             croupier.setTeam(teamName);
             for (int j = 0; j < 3; ++j)
-                croupier.setPlayer(teamName, generator.takeUniquePlayerName()).start();
+                croupier.setPlayer(generator.takeUniquePlayerName(), teamName).start();
         }
         TimerTask printResultTableTask = new CroupierTimer();
         TimerTask endGameTask = new EndTimer(t);
@@ -79,14 +79,3 @@ public class Main {
         endGameTimer.schedule(endGameTask, END_GAME_TIME);
     }
 }
-
-//        Thread threadInvitePlayerToTheTable = new Thread(() -> {
-//            while (!Thread.interrupted()) {
-//                for (int i = 0; i < croupier.getTeams().size(); ++i) {
-//                    synchronized (croupier.getTeams().get(i)) {
-//                        croupier.getTeams().get(i).notifyAll();
-//                    }
-//                }
-//            }
-//        });
-//        threadInvitePlayerToTheTable.start();
