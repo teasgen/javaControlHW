@@ -2,26 +2,133 @@ package com.dices.smirnov.vladislav;
 
 import java.util.*;
 
+/**
+ * Main class for program execution
+ * @author Vlad Smirnov
+ */
 public class Main {
+    /**
+     * The croupier
+     * Manages the whole process
+     */
     public static final Croupier croupier = new Croupier();
-    public static int CROUPIER_REQUEST_TIME = 1_000;
-    public static int END_GAME_TIME = 10_000;
-    static Timer croupierTimer = new Timer();
-    static Timer endGameTimer = new Timer();
+    /**
+     * Number of teams
+     */
+    static int teamsNumber;
+    /**
+     * Once at what time the croupier should print result table
+     */
+    public static int CROUPIER_REQUEST_TIME = 10_000;
+    /**
+     * How long the game lasts
+     */
+    public static int END_GAME_TIME = 35_000;
+
+    /**
+     * The croupier getter
+     * @return Modifiable current croupier
+     */
+    public static Croupier getCroupier() { return croupier; }
+
+    /**
+     * Main method, which manages the whole program
+     * @param args console arguments
+     */
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Wrong number of arguments");
+            return;
+        }
+        try {
+            teamsNumber = Integer.parseInt(args[0]);
+            if (teamsNumber < 0 || teamsNumber > 10)
+                throw new NumberFormatException("Wrong number of teams");
+        } catch (NumberFormatException e) {
+            System.out.println("Incorrect first argument!");
+            return;
+        }
+        singleGame();
+    }
+
+    /**
+     * This method is a single game.
+     * <p>Creates {@link Main#teamsNumber} teams of 3 people with random unique names and start threads</p>
+     * <p>Creates timers, which will execute every {@link Main#CROUPIER_REQUEST_TIME}, {@link Main#END_GAME_TIME} milliseconds</p>
+     */
+    public static void singleGame() {
+        System.out.println("\nThe new party has begun!");
+        NamesGenerator generator = new NamesGenerator();
+        for (int i = 0; i < teamsNumber; ++i) {
+            String teamName = generator.takeUniqueTeamName();
+            croupier.setTeam(teamName);
+            for (int j = 0; j < 3; ++j) {
+                String name = generator.takeUniquePlayerName();
+                System.out.println("-> Hello, I'm " + name + " from '" + teamName + "'");
+                croupier.setPlayer(name, teamName).start();
+            }
+        }
+
+        Timer croupierTimer = new Timer();
+        Timer endGameTimer = new Timer();
+        TimerTask printResultTableTask = new CroupierTimer();
+        TimerTask endGameTask = new EndTimer(croupierTimer, endGameTimer);
+        croupierTimer.schedule(printResultTableTask, new Date(), CROUPIER_REQUEST_TIME);
+        endGameTimer.schedule(endGameTask, END_GAME_TIME);
+    }
+
+    /**
+     * Class for printing result table every {@link Main#CROUPIER_REQUEST_TIME} ms
+     * <p>When called not the first time prints winners table</p>
+     */
     static class CroupierTimer extends TimerTask {
+        /**
+         * The number of calls
+         */
+        private int timesCalled = 0;
+
+        /**
+         * Overrides run method
+         */
         @Override
         public void run() {
+            if (timesCalled++ == 0)
+                return;
             synchronized (croupier.getResultTable()) {
-                System.out.println(croupier.teamsToString());
                 System.out.println(croupier);
             }
         }
     }
+
+    /**
+     * Class for game ending task after {@link Main#END_GAME_TIME} ms
+     * <p>Interrupts all player threads and both timers</p>
+     * <p>Finds winners and distributes prize between winner-teams</p>
+     * <p>Asks user for continuing the game, in positive case calls {@link Main#singleGame()}, otherwise exits</p>
+     */
     static class EndTimer extends TimerTask {
-        int teamsNumber;
-        EndTimer(int t) {
-            teamsNumber = t;
+        /**
+         * The instance of Timer, which executes every {@link Main#CROUPIER_REQUEST_TIME} ms
+         */
+        Timer croupierTimer;
+        /**
+         * The instance of Timer, which executes every {@link Main#END_GAME_TIME} ms
+         */
+        Timer endGameTimer;
+
+        /**
+         * Constructor, takes timers
+         * @param croupier as same as {@link EndTimer#croupierTimer}
+         * @param ending   as same as {@link EndTimer#endGameTimer}
+         */
+        EndTimer(Timer croupier, Timer ending) {
+            croupierTimer = croupier;
+            endGameTimer = ending;
         }
+
+        /**
+         * Overrides run method
+         */
         @Override
         public void run() {
             System.out.println("The game ended");
@@ -32,13 +139,14 @@ public class Main {
                     player.interrupt();
                 }
             }
+
             Random random = new Random();
             int prize = random.nextInt(1_000_000, 10_000_001);
             System.out.println(croupier);
             var winners = croupier.findWinners();
             int score = croupier.getResultTable().get(winners.get(0));
             double prizeForOneTeam = (double) prize / teamsNumber;
-            System.out.println("Winners, each team will get: " + String.format("%.2f", prizeForOneTeam) + "¥");
+            System.out.println("Each team will get: " + String.format("%.2f", prizeForOneTeam) + "¥");
             for (String winner : winners) {
                 Team team = croupier.getTeam(winner);
                 System.out.println("Team: '" + team.getLabel() + "'");
@@ -47,35 +155,25 @@ public class Main {
                             String.format("%.2f", prizeForOneTeam * ((double) player.getScore() / score)) + "¥");
                 }
             }
+
             for (Team team : croupier.getTeams()) {
                 for (Player player : team.getSquad()) {
-                    System.out.println(player.getPlayerName() + ": goodbye!");
+                    System.out.println("-> " + player.getPlayerName() + ": goodbye!");
                 }
+            }
+            System.out.print("Do you want to continue game? 'yes' or 'no': ");
+            String ans = new Scanner(System.in).next();
+            if (ans.equalsIgnoreCase("no") || ans.equalsIgnoreCase("n")) {
+                System.out.println("""
+                                Автор: Смирнов Владислав, БПИ211
+                                Если Вы нашли ошибку или есть вопросы, то напишите мне:
+                                    Телеграм: @teasgen
+                                    Почта:    vmsmirnov@edu.hse.ru""");
+            } else {
+                croupier.clear();
+                singleGame();
             }
         }
     }
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("Wrong number of arguments");
-            return;
-        }
-        int t;
-        try {
-            t = Integer.parseInt(args[0]);
-        } catch (NumberFormatException e) {
-            System.out.println("Incorrect number of teams!");
-            return;
-        }
-        NamesGenerator generator = new NamesGenerator();
-        for (int i = 0; i < t; ++i) {
-            String teamName = generator.takeUniqueTeamName();
-            croupier.setTeam(teamName);
-            for (int j = 0; j < 3; ++j)
-                croupier.setPlayer(generator.takeUniquePlayerName(), teamName).start();
-        }
-        TimerTask printResultTableTask = new CroupierTimer();
-        TimerTask endGameTask = new EndTimer(t);
-        croupierTimer.schedule(printResultTableTask, new Date(), CROUPIER_REQUEST_TIME);
-        endGameTimer.schedule(endGameTask, END_GAME_TIME);
-    }
+
 }

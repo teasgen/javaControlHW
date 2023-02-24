@@ -1,22 +1,28 @@
 package com.dices.smirnov.vladislav;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NamesGeneratorTests {
     @Test
     public void tryToGenerateNewTeamLabel() {
+        Set<String> set = new HashSet<>();
         NamesGenerator gen = new NamesGenerator();
-        for (int i = 0; i < gen.teamsNames.size(); ++i)
-            assertTrue(gen.teamsNames.contains(gen.takeUniqueTeamName()));
-        assertEquals(10, gen.teamsNames.size());
+        for (int i = 0; i < 10; ++i)
+            set.add(gen.takeUniqueTeamName());
+        assertEquals(10, set.size());
     }
     @Test
     public void tryToGenerateNewPlayerName() {
+        Set<String> set = new HashSet<>();
         NamesGenerator gen = new NamesGenerator();
         for (int i = 0; i < gen.playersNames.size(); ++i)
-            assertTrue(gen.playersNames.contains(gen.takeUniquePlayerName()));
-        assertEquals(30, gen.playersNames.size());
+            set.add(gen.takeUniquePlayerName());
+        assertEquals(30, set.size());
     }
     @Test
     public void generatorInit() {
