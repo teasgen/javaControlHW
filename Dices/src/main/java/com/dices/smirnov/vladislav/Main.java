@@ -101,6 +101,17 @@ public class Main {
     }
 
     /**
+     * @return information about author
+     */
+    static String aboutAuthor() {
+    return  """
+            Автор: Смирнов Владислав, БПИ211
+            Если Вы нашли ошибку или есть вопросы, то напишите мне:
+                Телеграм: @teasgen
+                Почта:    vmsmirnov@edu.hse.ru""";
+    }
+
+    /**
      * Class for game ending task after {@link Main#END_GAME_TIME} ms
      * <p>Interrupts all player threads and both timers</p>
      * <p>Finds winners and distributes prize between winner-teams</p>
@@ -164,14 +175,13 @@ public class Main {
             System.out.print("Do you want to continue game? 'yes' or 'no': ");
             String ans = new Scanner(System.in).next();
             if (ans.equalsIgnoreCase("no") || ans.equalsIgnoreCase("n")) {
-                System.out.println("""
-                                Автор: Смирнов Владислав, БПИ211
-                                Если Вы нашли ошибку или есть вопросы, то напишите мне:
-                                    Телеграм: @teasgen
-                                    Почта:    vmsmirnov@edu.hse.ru""");
-            } else {
+                System.out.println(aboutAuthor());
+            } else if (ans.equalsIgnoreCase("yes") || ans.equalsIgnoreCase("y")) {
                 croupier.clear();
                 singleGame();
+            } else {
+                System.out.println("Incorrect answer");
+                System.out.println(aboutAuthor());
             }
         }
     }

@@ -74,22 +74,19 @@ public class Player extends Thread {
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-            try {
-                synchronized (Main.getCroupier().getTeam(teamLabel)) {
-                    int currentScore = makePlay();
-                    score += currentScore;
-                    synchronized (Main.getCroupier().getResultTable()) {
-                        Croupier croupier = Main.getCroupier();
-                        if (Main.getCroupier().getResultTable().containsKey(teamLabel)) {
-                            Integer teamScore = croupier.getResultTable().get(teamLabel);
-                            Main.getCroupier().getResultTable().put(teamLabel, teamScore + currentScore);
-                        } else {
-                            Main.getCroupier().getResultTable().putIfAbsent(teamLabel, currentScore);
-                        }
-                    }
+            int currentScore;
+            synchronized (Main.getCroupier().getTeam(teamLabel)) {
+                currentScore = makePlay();
+                score += currentScore;
+            }
+            synchronized (Main.getCroupier().getResultTable()) {
+                Croupier croupier = Main.getCroupier();
+                if (Main.getCroupier().getResultTable().containsKey(teamLabel)) {
+                    Integer teamScore = croupier.getResultTable().get(teamLabel);
+                    Main.getCroupier().getResultTable().put(teamLabel, teamScore + currentScore);
+                } else {
+                    Main.getCroupier().getResultTable().putIfAbsent(teamLabel, currentScore);
                 }
-            } catch (NullPointerException e) {
-                System.out.println(name + ", " + teamLabel);
             }
             try {
                 Thread.sleep(rnd.nextInt(100, 1001));
