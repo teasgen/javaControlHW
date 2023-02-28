@@ -32,6 +32,7 @@ public class Player extends Thread {
     Player(String playerName, String label) {
         name = playerName;
         teamLabel = label;
+        System.out.println("-> Hello, I'm " + name + " from '" + teamLabel + "'");
     }
 
     @Override
@@ -70,6 +71,7 @@ public class Player extends Thread {
      * Override main Thread method
      * <p>In infinite loop calculates current score, wait until the result table wont be reachable and rewrite it</p>
      * <p>Sleep for [100, 1000]ms</p>
+     * <p>When is interrupted calculates an award and says goodbye message</p>
      */
     @Override
     public void run() {
@@ -80,19 +82,30 @@ public class Player extends Thread {
                 score += currentScore;
             }
             synchronized (Main.getCroupier().getResultTable()) {
-                Croupier croupier = Main.getCroupier();
+                if (Thread.currentThread().isInterrupted())
+                    break;
                 if (Main.getCroupier().getResultTable().containsKey(teamLabel)) {
-                    Integer teamScore = croupier.getResultTable().get(teamLabel);
+                    Integer teamScore = Main.getCroupier().getResultTable().get(teamLabel);
                     Main.getCroupier().getResultTable().put(teamLabel, teamScore + currentScore);
                 } else {
                     Main.getCroupier().getResultTable().putIfAbsent(teamLabel, currentScore);
                 }
             }
+            if (Thread.currentThread().isInterrupted())
+                break;
             try {
                 Thread.sleep(rnd.nextInt(100, 1001));
             } catch (InterruptedException e) {
-                return;
+                break;
             }
+        }
+        double winnerScore = Main.getCroupier().getScore();
+        if (Main.getCroupier().getResultTable().get(teamLabel) == winnerScore) {
+            double myAward = Main.getCroupier().getPrize() * (score / winnerScore);
+            System.out.println("\uD83D\uDE0E " + name + " from " + teamLabel + " gets " +
+                    String.format("%.2f", myAward) + "¥ and says goodbye!");
+        } else {
+            System.out.println(name + " from " + teamLabel + " says goodbye!");
         }
     }
 

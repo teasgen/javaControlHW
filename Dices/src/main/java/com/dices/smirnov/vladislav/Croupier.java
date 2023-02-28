@@ -16,7 +16,22 @@ public class Croupier {
      * Result table - key is team label, value is sum of players scores
      */
     private final Map<String, Integer> resultTable = new HashMap<>();
-
+    /**
+     * The prize for each winner
+     */
+    private double prize = 0.0;
+    /**
+     * The winner score;
+     */
+    private int score = 0;
+    /**
+     * The list of current game winners
+     */
+    private List<String> winners = new ArrayList<>();
+    /**
+     * The random for prize generation
+     */
+    private final Random rnd = new Random();
     /**
      * Player setter
      * @param playerName {@link Player#getPlayerName()}
@@ -40,6 +55,15 @@ public class Croupier {
     public void setTeam(String label) {
         Team team = new Team(label);
         teams.add(team);
+    }
+
+    /**
+     * Generates random number in [1_000_000; 10_000_000]. Finds winner-teams and sets prize as generated number divide by quantity of winner-teams
+     */
+    public void generatePrize() {
+        int totalPrize = rnd.nextInt(1_000_000, 10_000_001);
+        winners = findWinners();
+        prize = (double) totalPrize / winners.size();
     }
 
     /**
@@ -69,11 +93,28 @@ public class Croupier {
     }
 
     /**
-     * Clear all variables
+     * @return Prize for each winner when the game has ended, otherwise 0.0
+     */
+    public double getPrize() {
+        return prize;
+    }
+
+    /**
+     * @return Winner score when the game has ended, otherwise 0.0
+     */
+    public int getScore() {
+        return score;
+    }
+
+    /**
+     * Set all variables to default values
      */
     public void clear() {
         teams.clear();
         resultTable.clear();
+        winners.clear();
+        prize = 0.0;
+        score = 0;
     }
 
     /**
@@ -90,9 +131,13 @@ public class Croupier {
                 winners.add(team.getKey());
             }
         }
+        score = max;
         return winners;
     }
 
+    /**
+     * @return String: pretty view of teams with the highest score
+     */
     @Override
     public String toString() {
         List<String> winners = this.findWinners();
@@ -102,5 +147,19 @@ public class Croupier {
             res.append("\t'").append(winner).append("': ").append(resultTable.get(winner)).append(" points\n");
         }
         return res.append("----------------\n").toString();
+    }
+
+    /**
+     * @return String: pretty view of all teams, their players and corresponding scores
+     */
+    public String getTotalResultsInPrettyView() {
+        StringBuilder res = new StringBuilder();
+        res.append(this);
+        for (Team team : teams) {
+            res.append(team.toString()).append(":\n");
+            for (Player player : team.getSquad())
+                res.append('\t').append(player.toString()).append("\n");
+        }
+        return res.toString();
     }
 }

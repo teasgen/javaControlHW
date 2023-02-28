@@ -1,12 +1,14 @@
 package com.dices.smirnov.vladislav;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Isolated
 public class MainTests {
     @Test
     public void gettingWrongConsoleArgumentsCount() {
@@ -39,6 +41,15 @@ public class MainTests {
                     return;
                 }
                 player.interrupt();
+            }
+        }
+        for (Team team : Main.getCroupier().getTeams()) {
+            for (Player player : team.getSquad()) {
+                try {
+                    player.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         assertTrue(true);

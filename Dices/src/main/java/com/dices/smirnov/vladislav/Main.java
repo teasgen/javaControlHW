@@ -19,11 +19,11 @@ public class Main {
     /**
      * Once at what time the croupier should print result table
      */
-    public static int CROUPIER_REQUEST_TIME = 10_000;
+    public static int CROUPIER_REQUEST_TIME = 800;
     /**
      * How long the game lasts
      */
-    public static int END_GAME_TIME = 35_000;
+    public static int END_GAME_TIME = 2_000;
 
     /**
      * The croupier getter
@@ -64,7 +64,6 @@ public class Main {
             croupier.setTeam(teamName);
             for (int j = 0; j < 3; ++j) {
                 String name = generator.takeUniquePlayerName();
-                System.out.println("-> Hello, I'm " + name + " from '" + teamName + "'");
                 croupier.setPlayer(name, teamName).start();
             }
         }
@@ -104,7 +103,7 @@ public class Main {
      * @return information about author
      */
     static String aboutAuthor() {
-    return  """
+        return  """
             Автор: Смирнов Владислав, БПИ211
             Если Вы нашли ошибку или есть вопросы, то напишите мне:
                 Телеграм: @teasgen
@@ -114,7 +113,7 @@ public class Main {
     /**
      * Class for game ending task after {@link Main#END_GAME_TIME} ms
      * <p>Interrupts all player threads and both timers</p>
-     * <p>Finds winners and distributes prize between winner-teams</p>
+     * <p>Finds winners and generate prize value. After this interrupts all player threads and outputs the result table</p>
      * <p>Asks user for continuing the game, in positive case calls {@link Main#singleGame()}, otherwise exits</p>
      */
     static class EndTimer extends TimerTask {
@@ -143,35 +142,29 @@ public class Main {
         @Override
         public void run() {
             System.out.println("The game ended");
+            croupier.generatePrize();
+            System.out.println("\uD83D\uDE31 Each winner team will get: " + croupier.getPrize() + "¥ \uD83D\uDE31 \n");
             croupierTimer.cancel();
             endGameTimer.cancel();
+            synchronized (croupier.getResultTable()) {
+                for (Team team : croupier.getTeams()) {
+                    for (Player player : team.getSquad()) {
+                        player.interrupt();
+                    }
+                }
+            }
             for (Team team : croupier.getTeams()) {
                 for (Player player : team.getSquad()) {
-                    player.interrupt();
+                    try {
+                        player.join();
+                    } catch (InterruptedException e) {
+                        System.out.println("Something went wrong... I will interrupt the game");
+                        return;
+                    }
                 }
             }
+            System.out.println(croupier.getTotalResultsInPrettyView());
 
-            Random random = new Random();
-            int prize = random.nextInt(1_000_000, 10_000_001);
-            System.out.println(croupier);
-            var winners = croupier.findWinners();
-            int score = croupier.getResultTable().get(winners.get(0));
-            double prizeForOneTeam = (double) prize / teamsNumber;
-            System.out.println("Each team will get: " + String.format("%.2f", prizeForOneTeam) + "¥");
-            for (String winner : winners) {
-                Team team = croupier.getTeam(winner);
-                System.out.println("Team: '" + team.getLabel() + "'");
-                for (Player player : team.getSquad()) {
-                    System.out.println("\t" + player.getPlayerName() + " gets " +
-                            String.format("%.2f", prizeForOneTeam * ((double) player.getScore() / score)) + "¥");
-                }
-            }
-
-            for (Team team : croupier.getTeams()) {
-                for (Player player : team.getSquad()) {
-                    System.out.println("-> " + player.getPlayerName() + ": goodbye!");
-                }
-            }
             System.out.print("Do you want to continue game? 'yes' or 'no': ");
             String ans = new Scanner(System.in).next();
             if (ans.equalsIgnoreCase("no") || ans.equalsIgnoreCase("n")) {
@@ -180,10 +173,8 @@ public class Main {
                 croupier.clear();
                 singleGame();
             } else {
-                System.out.println("Incorrect answer");
-                System.out.println(aboutAuthor());
+                System.out.println("\nI can't recognize your answer and will interrupt the game(\n" + aboutAuthor());
             }
         }
     }
-
 }
