@@ -218,12 +218,12 @@ public class GroupServer {
         @Override
         public void run() {
             Group group = getClientGroup(client);
-            long time = ((new Date()).getTime() - group.startTime.getTime()) / 1000;
-            GroupStats current = new GroupStats(group, GAME_DURATION / 1000 - time, client);
+            long time = GAME_DURATION / 1000 - ((new Date()).getTime() - group.startTime.getTime()) / 1000;
+            GroupStats current = new GroupStats(group, time, client);
             System.out.println(time);
             try {
                 client.out.writeObject(current);
-                client.out.flush();
+//                client.out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

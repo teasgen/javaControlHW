@@ -14,13 +14,13 @@ public class Client {
             out.writeObject("Vlad");
             out.flush();
             while (true) {
-                Object now;
+                Object now = null;
                 try {
                     now = in.readObject();
                     String s = (String) now;
-                    System.out.println(s);
+                    System.out.println(s.length());
                 } catch (ClassCastException e) {
-                    GroupStats groupStats = (GroupStats) in.readObject();
+                    GroupStats groupStats = (GroupStats) now;
                     System.out.println(groupStats.remainTime);
                 }
             }
