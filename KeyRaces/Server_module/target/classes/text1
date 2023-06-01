@@ -1,0 +1,6 @@
+This question would have been a duplicate if it was easily detected. I kept on googling and searching with different search queries until I got to arghtype's answer on this SO page.
+The answer suggested you specifically build the project with maven goal. Intellij has a maven projects window on the left side of the main window which is usually minimized.
+When you click and the maven project window opens
+drop down the lifecycle and double click clean.
+when cleaning is done double click again on the package.
+That's all...check the target folder, you will see the jar file(s).

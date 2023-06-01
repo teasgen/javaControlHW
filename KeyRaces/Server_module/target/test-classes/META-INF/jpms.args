@@ -1,0 +1,4 @@
+--patch-module
+com.teasgen.keyraces.server=_
+--add-reads
+com.teasgen.keyraces.server=ALL-UNNAMED
