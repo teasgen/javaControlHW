@@ -12,15 +12,18 @@ public class GroupStats implements Serializable {
     public final List<Boolean> disconnected = new ArrayList<>();
     public final long remainTime;
     public GroupStats(GroupServer.Group group, long remainTime, GroupServer.ClientThread client) {
+        boolean everyoneHasWritten = true;
         for (GroupServer.ClientThread clientThread : group.getClients()) {
             if (!clientThread.isRunning())
                 break;
-            names.add(clientThread.getName());
+            names.add(clientThread.getPlayerName());
             totalCount.add(clientThread.getTotalCnt());
+            everyoneHasWritten &= (clientThread.getTotalCnt() == group.getTextLength());
             errorCount.add(clientThread.getErrorCnt());
             itsMe.add(client.equals(clientThread));
-            disconnected.add(clientThread.isConnected());
+            disconnected.add(client.isRunning());
         }
+        group.setGenius(everyoneHasWritten);
         this.remainTime = remainTime;
     }
 }

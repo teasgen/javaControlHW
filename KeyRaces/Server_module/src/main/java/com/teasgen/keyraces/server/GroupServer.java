@@ -7,10 +7,11 @@ import java.util.*;
 
 public class GroupServer {
     private static final int PORT = 5619;
-    private static final int GROUP_CREATION_TIME = 1_000; // 30 secs
-    private static final int GAME_DURATION = 180_000;      // 3 minutes
+    // TODO: change THIS TIME
+    private static final int GROUP_CREATION_TIME = 5_000; // 30 secs
+    private static final int GAME_DURATION = 10_000;      // 3 minutes
     private static final int TIME_STEP = 1_000;         // 1 sec
-    public List<Group> groups;
+    public volatile List<Group> groups;
     private static final Random rnd = new Random();
     public GroupServer() {
         groups = new ArrayList<>();
@@ -63,13 +64,14 @@ public class GroupServer {
     }
 
     public class ClientThread extends Thread {
-        private String name;
+        private String playerName;
         private final Socket clientSocket;
         private int totalCnt;
         private int errorCnt;
-        private boolean running;
+        private volatile boolean running;
         private ObjectInputStream in;
         private ObjectOutputStream out;
+        private final Timer sendStats = new Timer();
         public ClientThread(Socket clientSocket) {
             this.clientSocket = clientSocket;
         }
@@ -78,17 +80,23 @@ public class GroupServer {
             try {
                 out = new ObjectOutputStream(clientSocket.getOutputStream());
                 in = new ObjectInputStream(clientSocket.getInputStream());
-                name = (String) in.readObject();
+                this.running = true;
+                playerName = (String) in.readObject();
                 Group group = getClientGroup(this);
                 group.sendMessageToAllMembers("Now your group consists of:\n" + group);
                 synchronized (group.lock) { // wait until the game starts
                     group.lock.wait();
                 }
-                Timer sendStats = new Timer();
                 sendStats.schedule(new ClientStatisticsTimer(this), 0, TIME_STEP);
-                while (true) {}
+                while (true) {
+                    ClientStats clientStats = (ClientStats) in.readObject();
+                    totalCnt = clientStats.totalNumber();
+                    errorCnt = clientStats.errorsNumber();
+                    System.out.println(totalCnt + " " + errorCnt);
+                }
             } catch (IOException | InterruptedException e) {
-                System.out.println("Client " + clientSocket + " was disconnected");
+                running = false;
+                System.out.println("Client " + playerName + " was disconnected");
                 Group group = getClientGroup(this);
                 if (group == null)
                     throw new RuntimeException();
@@ -96,23 +104,17 @@ public class GroupServer {
                 if (group.isEmpty()) {
                     groups.remove(group);
                 } else {
-                    // TODO: message to all user in this group about player disconnection
-                    for (ClientThread clientThread : group.clients) {
-                        try {
-                            clientThread.out.writeUTF("The player " + this.name + " from your group was disconnected");
-                        } catch (IOException ex) {
-                            // this client was disconnected too
-                        }
-                    }
+                    group.sendMessageToAllMembers("The player " + this.playerName + " from your group was disconnected");
                 }
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             } finally {
                 try {
-                    in.close();
                     out.close();
+                    in.close();
                     clientSocket.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
                     System.out.println("Stranger things with client....");
                 }
             }
@@ -129,19 +131,8 @@ public class GroupServer {
         public boolean isRunning() {
             return running;
         }
-
-        public boolean isConnected() {
-            if (!clientSocket.isConnected()) {
-                running = false;
-                return false;
-            }
-            return true;
-        }
-        public ObjectInputStream getIn() {
-            return in;
-        }
-        public ObjectOutputStream getOut() {
-            return out;
+        public String getPlayerName() {
+            return playerName;
         }
     }
 
@@ -151,6 +142,12 @@ public class GroupServer {
         private volatile boolean opened;
         public final Object lock;
         private final Date startTime = new Date();
+        private int textLength;
+        /**
+         * true if all players have already written the text
+         * otherwise false
+         */
+        private boolean genius;
         public Group() {
             clients = new ArrayList<>();
             opened = true;
@@ -187,9 +184,10 @@ public class GroupServer {
         public synchronized void sendMessageToAllMembers(String message) {
             for (ClientThread clientThread : clients) {
                 try {
+                    clientThread.out.writeInt(1);
                     clientThread.out.writeObject(message);
                 } catch (IOException e) {
-                    System.out.println("Connection to " + clientThread.name + " was lost");
+                    System.out.println("Connection to " + clientThread.playerName + " was lost");
                 }
             }
         }
@@ -198,12 +196,24 @@ public class GroupServer {
         public String toString() {
             StringBuilder res = new StringBuilder();
             for (ClientThread clientThread : clients)
-                res.append(clientThread.name).append(", ");
+                res.append(clientThread.playerName).append(", ");
             return res.toString();
         }
 
-        public Date getStartTime() {
-            return startTime;
+        public int getTextLength() {
+            return textLength;
+        }
+
+        public void setTextLength(int textLength) {
+            this.textLength = textLength;
+        }
+
+        public boolean isGenius() {
+            return genius;
+        }
+
+        public void setGenius(boolean genius) {
+            this.genius = genius;
         }
     }
     public class ClientStatisticsTimer extends TimerTask {
@@ -218,14 +228,27 @@ public class GroupServer {
         @Override
         public void run() {
             Group group = getClientGroup(client);
-            long time = GAME_DURATION / 1000 - ((new Date()).getTime() - group.startTime.getTime()) / 1000;
+            if (group == null) {
+                client.sendStats.cancel();
+                return;
+            }
+            long time = (GAME_DURATION - (new Date()).getTime() + group.startTime.getTime()) / 1000;
             GroupStats current = new GroupStats(group, time, client);
             System.out.println(time);
             try {
-                client.out.writeObject(current);
-//                client.out.flush();
+                if (time == 0 || group.isGenius()) {
+                    System.out.println(group.isGenius());
+                    client.out.writeInt(3);
+                    client.out.writeObject(current);
+                    client.out.flush();
+                    throw new IOException("the game ended"); // need to cancel the timer
+                } else {
+                    client.out.writeInt(2);
+                    client.out.writeObject(current);
+                    client.out.flush();
+                }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                client.sendStats.cancel();
             }
         }
     }

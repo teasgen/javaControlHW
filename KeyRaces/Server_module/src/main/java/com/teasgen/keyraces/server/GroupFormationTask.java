@@ -30,15 +30,16 @@ public class GroupFormationTask extends TimerTask {
     public void run() {
         group.close();
         group.sendMessageToAllMembers("5 seconds left: ");
-        InputStream inputStream = GroupServer.class.getClassLoader().getResourceAsStream("text1");
+        InputStream inputStream = GroupServer.class.getResourceAsStream("/texts/text1");
         if (inputStream == null) {
             return;
         }
         String text = new Scanner(inputStream, StandardCharsets.UTF_8).useDelimiter("\\A").next();
         System.out.println(text);
+        group.setTextLength(text.length());
         group.sendMessageToAllMembers(text);
         try {
-            Thread.sleep(0);
+            Thread.sleep(0); // TODO: change THIS TIME
         } catch (InterruptedException e) {
             System.out.println("The server was disconnected");
         }
