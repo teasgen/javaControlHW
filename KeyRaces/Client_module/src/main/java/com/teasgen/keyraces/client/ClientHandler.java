@@ -44,7 +44,7 @@ public class ClientHandler extends Thread {
                     }
                     default -> System.out.println("Wtf");
                 }
-                if (action == 3)
+                if (action >= 3)
                     break;
             }
         } catch (IOException | ClassNotFoundException e) {

@@ -11,13 +11,35 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.teasgen.keyraces.client.MainViewController"
-      prefHeight="400.0" prefWidth="600.0" alignment="CENTER">
+      prefHeight="600.0" prefWidth="400.0" alignment="CENTER"
+      spacing="20">
     <fx:define>
-        <Integer fx:value="16" fx:id="PADDING"/>
+        <Integer fx:value="55" fx:id="HOR_PADDING"/>
+        <Integer fx:value="15" fx:id="VER_PADDING"/>
     </fx:define>
     <padding>
-        <Insets top="$PADDING" left="$PADDING" right="$PADDING" bottom="$PADDING"/>
+        <Insets top="$VER_PADDING" left="$HOR_PADDING" right="$HOR_PADDING" bottom="$VER_PADDING"/>
     </padding>
-    <TextField fx:id="nameHost"/>
-    <Text fx:id="inputHost"/>
+
+    <VBox spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER">
+        <HBox alignment="CENTER_LEFT">
+            <Label text="Server Address" fx:id="serverAddressLabel"/>
+        </HBox>
+        <TextField fx:id="serverAddressField" promptText="localhost"/>
+
+        <HBox alignment="CENTER_LEFT">
+            <Label text="Port"  fx:id="portLabel"/>
+        </HBox>
+        <TextField fx:id="portField" promptText="5619"/>
+
+        <HBox alignment="CENTER_LEFT">
+            <Label text="Your name"  fx:id="nameLabel"/>
+        </HBox>
+        <TextField fx:id="nameField" promptText="Идет медведь по лесу..."/>
+    </VBox>
+
+    <VBox spacing="30" VBox.vgrow="ALWAYS" alignment="CENTER">
+        <Button text="Play" fx:id="playGame" onAction="#handlePlayButton"/>
+        <Button text="About Game" fx:id="aboutGame" onAction="#handleAboutGameButton"/>
+    </VBox>
 </VBox>
