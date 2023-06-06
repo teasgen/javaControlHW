@@ -3,9 +3,16 @@ package com.teasgen.keyraces.client;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+
+import java.net.URL;
 
 public class MainViewController {
     @FXML
@@ -29,6 +36,8 @@ public class MainViewController {
     private SimpleStringProperty portProperty;
     private SimpleStringProperty nameProperty;
     private Object lock;
+    private String GAME_FXML_PATH="/game-view.fxml";
+    private ClientViewModel viewModel;
 
     @FXML
     private void initialize() {
@@ -47,10 +56,21 @@ public class MainViewController {
         }));
     }
     @FXML
-    public void handlePlayButton(ActionEvent actionEvent) {
+    public void handlePlayButton(ActionEvent actionEvent) throws Exception {
         synchronized (lock) {
             lock.notifyAll();
         }
+        URL url = Client.class.getResource(GAME_FXML_PATH);
+        if (url == null) {
+            throw new IllegalStateException("Cannot find '" + GAME_FXML_PATH + "'");
+        }
+        FXMLLoader loader = new FXMLLoader(url);
+        AnchorPane root = loader.load();
+        GameViewController controller = loader.getController();
+        controller.setViewModel(viewModel);
+
+        Stage window = (Stage) playGame.getScene().getWindow();
+        window.setScene(new Scene(root, 750, 500));
     }
     @FXML
     public void handleAboutGameButton(ActionEvent actionEvent) {
@@ -67,5 +87,9 @@ public class MainViewController {
 
     public void setLock(Object lock) {
         this.lock = lock;
+    }
+
+    public void setViewModel(ClientViewModel viewModel) {
+        this.viewModel = viewModel;
     }
 }

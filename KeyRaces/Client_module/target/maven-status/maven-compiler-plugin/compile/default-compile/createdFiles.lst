@@ -2,3 +2,5 @@ com/teasgen/keyraces/client/Client.class
 com/teasgen/keyraces/client/ClientHandler.class
 com/teasgen/keyraces/client/MainViewController.class
 module-info.class
+com/teasgen/keyraces/client/GameViewController.class
+com/teasgen/keyraces/client/ClientViewModel.class

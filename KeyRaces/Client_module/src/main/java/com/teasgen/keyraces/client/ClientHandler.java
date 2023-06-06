@@ -2,6 +2,8 @@ package com.teasgen.keyraces.client;
 
 import com.teasgen.keyraces.server.ClientStats;
 import com.teasgen.keyraces.server.GroupStats;
+import javafx.application.Platform;
+import javafx.beans.value.ObservableIntegerValue;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,11 +15,13 @@ public class ClientHandler extends Thread {
     public volatile boolean running;
     private volatile int totalNumber;
     private volatile int errorsNumber;
-    public ClientHandler(int port) {
+    private final ClientViewModel clientViewModel;
+    public ClientHandler(int port, ClientViewModel clientViewModel) {
         this.port = port;
         this.running = true;
         this.totalNumber = 0;
         this.errorsNumber = 0;
+        this.clientViewModel = clientViewModel;
     }
     @Override
     public void run() {
@@ -36,6 +40,7 @@ public class ClientHandler extends Thread {
                         System.out.println(groupStats.remainTime);
                         // TODO: send to GUI
                         out.writeObject(new ClientStats(totalNumber, errorsNumber));
+                        Platform.runLater(() -> clientViewModel.setTime(String.valueOf(groupStats.remainTime)));
                     }
                     case 3 -> {
                         GroupStats finalStats = (GroupStats) in.readObject();

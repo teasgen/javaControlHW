@@ -8,7 +8,7 @@ import java.util.*;
 public class GroupServer {
     private static final int PORT = 5619;
     // TODO: change THIS TIME
-    private static final int GROUP_CREATION_TIME = 5_000; // 30 secs
+    private static final int GROUP_CREATION_TIME = 1_000; // 30 secs
     private static final int GAME_DURATION = 10_000;      // 3 minutes
     private static final int TIME_STEP = 1_000;         // 1 sec
     public volatile List<Group> groups;

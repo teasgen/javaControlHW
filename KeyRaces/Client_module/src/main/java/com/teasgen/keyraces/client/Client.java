@@ -14,6 +14,7 @@ public class Client extends Application {
     private static final String FXML_FILE_PATH = "/main-view.fxml";
     private static final String STYLES_FILE_PATH = "/style.css";
     private static final Object lock = new Object();
+    private static final ClientViewModel clientViewModel = new ClientViewModel();
     public static void main(String[] args) {
         Thread fxThread = new Thread(() -> Application.launch(Client.class, args));
         fxThread.start();
@@ -26,7 +27,8 @@ public class Client extends Application {
             }
         }
 
-        ClientHandler clientHandler = new ClientHandler(PORT);
+        ClientHandler clientHandler = new ClientHandler(PORT, clientViewModel);
+
         clientHandler.start();
         while (fxThread.isAlive()) {}
         clientHandler.running = false;
@@ -53,13 +55,14 @@ public class Client extends Application {
             System.out.println("Name: " + newValue);
         });
         controller.setLock(lock);
+        controller.setViewModel(clientViewModel);
 
         Scene scene = new Scene(vBox);
         scene.getStylesheets().add(Client.class.getResource(STYLES_FILE_PATH).toExternalForm());
         stage.setScene(scene);
         stage.show();
     }
-    private static URL loadLayout() throws IOException {
+    private static URL loadLayout() {
         URL url = Client.class.getResource(FXML_FILE_PATH);
         if (url == null) {
             throw new IllegalStateException("Cannot find '" + FXML_FILE_PATH + "'");
