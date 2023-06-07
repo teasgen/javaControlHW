@@ -10,11 +10,12 @@ import java.io.IOException;
 import java.net.URL;
 
 public class Client extends Application {
-    private static final int PORT = 5619;
     private static final String FXML_FILE_PATH = "/main-view.fxml";
     private static final String STYLES_FILE_PATH = "/style.css";
     private static final Object lock = new Object();
     private static final ClientViewModel clientViewModel = new ClientViewModel();
+    private static final InitialViewModel initialViewModel = new InitialViewModel();
+
     public static void main(String[] args) {
         Thread fxThread = new Thread(() -> Application.launch(Client.class, args));
         fxThread.start();
@@ -27,7 +28,13 @@ public class Client extends Application {
             }
         }
 
-        ClientHandler clientHandler = new ClientHandler(PORT, clientViewModel);
+        initialViewModel.fillBlankOrIncorrectValues();
+        ClientHandler clientHandler = new ClientHandler(
+                initialViewModel.getAddress(),
+                Integer.parseInt(initialViewModel.getPort()),
+                initialViewModel.getName(),
+                clientViewModel
+        );
 
         clientHandler.start();
         while (fxThread.isAlive()) {}
@@ -45,17 +52,8 @@ public class Client extends Application {
         VBox vBox = loader.load();
         MainViewController controller = loader.getController();
 
-        controller.getServerAddressProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("Server Address: " + newValue);
-        });
-        controller.getPortProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("Port: " + newValue);
-        });
-        controller.getNameProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("Name: " + newValue);
-        });
         controller.setLock(lock);
-        controller.setViewModel(clientViewModel);
+        controller.setViewModel(clientViewModel, initialViewModel);
 
         Scene scene = new Scene(vBox);
         scene.getStylesheets().add(Client.class.getResource(STYLES_FILE_PATH).toExternalForm());

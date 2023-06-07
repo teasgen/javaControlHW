@@ -1,7 +1,8 @@
 Server sends:
-    1 + String - message
+    1 + String - any message
     2 + GroupStats - table update during the game
     3 + GroupStats - final results
+    4 + String - text
 
 Client sends:
     String {name} - once, at the beginning

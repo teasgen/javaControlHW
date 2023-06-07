@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -31,29 +32,13 @@ public class MainViewController {
     public Button aboutGame;
     @FXML
     public Button playGame;
-
-    private SimpleStringProperty serverAddressProperty;
-    private SimpleStringProperty portProperty;
-    private SimpleStringProperty nameProperty;
     private Object lock;
     private String GAME_FXML_PATH="/game-view.fxml";
-    private ClientViewModel viewModel;
+    private ClientViewModel clientViewModel;
+    private InitialViewModel initialViewModel;
 
     @FXML
     private void initialize() {
-        serverAddressProperty = new SimpleStringProperty();
-        portProperty = new SimpleStringProperty();
-        nameProperty = new SimpleStringProperty();
-
-        // Bind the properties to the text field values
-        serverAddressProperty.bind(serverAddressField.textProperty());
-        portProperty.bind(portField.textProperty());
-        nameProperty.bind(nameField.textProperty());
-
-        serverAddressField.textProperty().addListener(((observable, oldValue, newValue) -> {
-            String name = !newValue.isBlank() ? newValue : "ALL";
-            serverAddressLabel.setText(name);
-        }));
     }
     @FXML
     public void handlePlayButton(ActionEvent actionEvent) throws Exception {
@@ -65,31 +50,26 @@ public class MainViewController {
             throw new IllegalStateException("Cannot find '" + GAME_FXML_PATH + "'");
         }
         FXMLLoader loader = new FXMLLoader(url);
-        AnchorPane root = loader.load();
+        FlowPane root = loader.load();
         GameViewController controller = loader.getController();
-        controller.setViewModel(viewModel);
+        controller.setViewModel(clientViewModel);
 
         Stage window = (Stage) playGame.getScene().getWindow();
-        window.setScene(new Scene(root, 750, 500));
+        window.setScene(new Scene(root, 1400, 1000));
     }
     @FXML
-    public void handleAboutGameButton(ActionEvent actionEvent) {
+    public void handleAboutGameButton(ActionEvent actionEvent) { // TODO
     }
-    public SimpleStringProperty getServerAddressProperty() {
-        return serverAddressProperty;
-    }
-    public SimpleStringProperty getPortProperty() {
-        return portProperty;
-    }
-    public SimpleStringProperty getNameProperty() {
-        return nameProperty;
-    }
-
     public void setLock(Object lock) {
         this.lock = lock;
     }
 
-    public void setViewModel(ClientViewModel viewModel) {
-        this.viewModel = viewModel;
+    public void setViewModel(ClientViewModel clientViewModel, InitialViewModel initialViewModel) {
+        this.clientViewModel = clientViewModel;
+        this.initialViewModel = initialViewModel;
+
+        this.serverAddressField.textProperty().bindBidirectional(initialViewModel.addressProperty());
+        this.nameField.textProperty().bindBidirectional(initialViewModel.nameProperty());
+        this.portField.textProperty().bindBidirectional(initialViewModel.portProperty());
     }
 }
