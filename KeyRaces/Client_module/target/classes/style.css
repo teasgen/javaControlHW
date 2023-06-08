@@ -1,4 +1,4 @@
-#playGame, #aboutGame {
+#playGame, #aboutGame, #tryAgain {
     -fx-background-color: transparent;
     -fx-text-fill: black;
     -fx-padding: 20 50;
@@ -11,7 +11,7 @@
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
-#nameField, #portField, #serverAddressField {
+#nameField, #portField, #serverAddressField, #inputText, #myText, #table {
     -fx-background-color: transparent;
     -fx-border-radius: 10;
     -fx-border-width: 2;

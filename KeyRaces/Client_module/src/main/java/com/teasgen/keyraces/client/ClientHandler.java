@@ -17,7 +17,8 @@ public class ClientHandler extends Thread {
     private final String address;
     private final String name;
     public volatile boolean running;
-    private int timeToEnd = Integer.MIN_VALUE;
+//    private int timeToEnd = Integer.MIN_VALUE;
+    private final ArrayList<Integer> timeToEnd = new ArrayList<>();
     private String text;
     private final ClientViewModel clientViewModel;
     private String currentWinner;
@@ -32,6 +33,8 @@ public class ClientHandler extends Thread {
         this.name = name;
         this.running = true;
         this.clientViewModel = clientViewModel;
+        for (int i = 0; i < 3; ++i)
+            timeToEnd.add(Integer.MIN_VALUE);
     }
     @Override
     public void run() {
@@ -73,12 +76,18 @@ public class ClientHandler extends Thread {
                             );
                         }
                         case 4 -> {
+                            Platform.runLater(() -> clientViewModel.setShowAll(true));
                             text = (String) in.readObject();
                             Platform.runLater(() -> clientViewModel.setText(text));
                         }
+                        case 5 -> {
+                            text = (String) in.readObject();
+                            System.out.println(text);
+                            Platform.runLater(() -> clientViewModel.setText("Starts in " + text + " seconds"));
+                        }
                         default -> System.out.println("Wtf");
                     }
-                    if (action > 4 || action == 3)
+                    if (action > 5 || action == 3)
                         break;
                 }
             } catch (SocketException e) {
@@ -96,10 +105,9 @@ public class ClientHandler extends Thread {
         Integer elapsedTime = (GroupServer.GAME_DURATION / 1000) - groupStats.remainTime;
         Set<ArrayList<Integer>> table = new TreeSet<>(new ArrayListComparator());
         for (int i = 0; i < groupStats.names.size(); ++i) {
-            if (groupStats.itsMe.get(i) && timeToEnd == Integer.MIN_VALUE && groupStats.totalCount.get(i) == groupStats.textLength)
-                timeToEnd = elapsedTime;
-            int curTime = timeToEnd == Integer.MIN_VALUE ? elapsedTime : timeToEnd;
-            System.out.println(elapsedTime + " " + curTime);
+            if (timeToEnd.get(i) == Integer.MIN_VALUE && groupStats.totalCount.get(i) == groupStats.textLength)
+                timeToEnd.set(i, elapsedTime);
+            int curTime = timeToEnd.get(i) == Integer.MIN_VALUE ? elapsedTime : timeToEnd.get(i);
             if (groupStats.disconnected.get(i))
                 continue;
             int correctNumber = groupStats.totalCount.get(i);
@@ -134,7 +142,7 @@ public class ClientHandler extends Thread {
     private void statsToViewModelDuringGame(GroupStats groupStats) {
         String res = formTable(groupStats);
         Platform.runLater(() -> {
-            clientViewModel.setTime(String.valueOf(groupStats.remainTime));
+            clientViewModel.setTime("Remain time: " + groupStats.remainTime);
             clientViewModel.setTable(res);
             clientViewModel.setDisabled(false);
         });

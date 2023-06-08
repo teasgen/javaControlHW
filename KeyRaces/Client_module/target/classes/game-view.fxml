@@ -16,21 +16,27 @@
         </FlowPane.margin>
         <BorderPane prefHeight="150.0" prefWidth="1300.0">
             <left>
-                <Label fx:id="table" prefHeight="150.0" prefWidth="700.0" text="Result table">
+                <Label fx:id="table" prefHeight="119.0" prefWidth="501.0" text="Result table" visible="false">
                     <font>
                         <Font size="18.0" />
                     </font>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
                 </Label>
             </left>
             <right>
-                <Label fx:id="remainTime" prefHeight="150.0" prefWidth="300.0" text="HERE WILL BE TIME">
+                <Label fx:id="remainTime" prefHeight="99.0" prefWidth="222.0" text="HERE WILL BE TIME" visible="false">
                     <font>
                         <Font size="18.0" />
                     </font>
                 </Label>
             </right>
           <top>
-              <Label fx:id="tableTimePreview" text="Players" BorderPane.alignment="CENTER">
+              <Label fx:id="tableTimePreview" text="Players" visible="false" BorderPane.alignment="CENTER">
                   <font>
                       <Font size="18.0" />
                   </font>
@@ -39,39 +45,45 @@
         </BorderPane>
         <BorderPane prefHeight="400.0" prefWidth="1380.0">
            <top>
-               <Label fx:id="textLabel" text="Text" BorderPane.alignment="CENTER">
+               <Label fx:id="textLabel" minHeight="-Infinity" minWidth="-Infinity" prefHeight="44.0" text="Text" visible="false" BorderPane.alignment="CENTER">
                    <font>
                        <Font size="18.0" />
                    </font>
                </Label>
            </top>
          <center>
-               <Label fx:id="myText" alignment="TOP_LEFT" prefHeight="400.0" prefWidth="1300.0" text="Text" wrapText="true" BorderPane.alignment="CENTER">
+               <Label fx:id="myText" alignment="TOP_LEFT" prefHeight="312.0" prefWidth="1300.0" wrapText="true" BorderPane.alignment="CENTER">
                    <font>
                        <Font size="18.0" />
                    </font>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
                </Label>
          </center>
         </BorderPane>
-        <BorderPane prefHeight="400.0" prefWidth="1300.0">
+        <BorderPane prefHeight="397.0" prefWidth="1300.0">
            <top>
-               <Label fx:id="warningsAboutText" text="Input text here" BorderPane.alignment="CENTER">
+               <Label fx:id="warningsAboutText" prefHeight="53.0" text="Input text here" visible="false" BorderPane.alignment="CENTER">
                    <font>
                        <Font size="18.0" />
                    </font>
                </Label>
            </top>
-         <center>
-               <TextArea fx:id="inputText" prefHeight="316.0" prefWidth="1300.0" BorderPane.alignment="CENTER">
+         <left>
+               <TextArea fx:id="inputText" minHeight="-Infinity" minWidth="-Infinity" prefHeight="298.0" prefWidth="1288.0" visible="false" BorderPane.alignment="CENTER">
                    <font>
                        <Font size="18.0" />
                    </font>
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
                </TextArea>
-         </center>
+         </left>
         </BorderPane>
       <BorderPane prefHeight="89.0" prefWidth="1300.0">
          <right>
-            <Button fx:id="tryAgain" mnemonicParsing="false" prefHeight="52.0" prefWidth="124.0" text="Play Again" BorderPane.alignment="CENTER">
+            <Button fx:id="tryAgain" mnemonicParsing="false" prefHeight="52.0" prefWidth="230.0" text="Play Again" BorderPane.alignment="CENTER">
                <font>
                   <Font size="16.0" />
                </font>

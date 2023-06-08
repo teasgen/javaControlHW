@@ -9,7 +9,7 @@ public class GroupServer {
     private static final int PORT = 5619;
     // TODO: change THIS TIME
     public static final int GROUP_CREATION_TIME = 5_000; // 30 secs
-    public static final int GAME_DURATION = 1_000;      // 3 minutes
+    public static final int GAME_DURATION = 15_000;      // 3 minutes
     public static final int TIME_STEP = 1_000;         // 1 sec
     public volatile List<Group> groups;
     private static final Random rnd = new Random();
@@ -32,7 +32,9 @@ public class GroupServer {
                         availableGroup = new Group();
                         groups.add(availableGroup);
                         Timer groupFormationTimer = new Timer();
-                        groupFormationTimer.schedule(new GroupFormationTask(availableGroup), GROUP_CREATION_TIME);
+                        Timer timeToStartTask = new Timer();
+                        timeToStartTask.schedule(new TimeToStartTask(availableGroup), 0, TIME_STEP);
+                        groupFormationTimer.schedule(new GroupFormationTask(availableGroup, timeToStartTask), GROUP_CREATION_TIME);
                     }
                     availableGroup.addClient(newClient);
                 }
@@ -249,8 +251,10 @@ public class GroupServer {
     }
     public class ClientStatisticsTimer extends TimerTask {
         GroupServer.ClientThread client;
+        int time;
         public ClientStatisticsTimer(GroupServer.ClientThread client) {
             this.client = client;
+            this.time = GAME_DURATION;
         }
 
         /**
@@ -263,8 +267,8 @@ public class GroupServer {
                 client.sendStats.cancel();
                 return;
             }
-            int time = (int) ((GAME_DURATION - (new Date()).getTime() + group.startTime.getTime()) / 1000);
-            GroupStats current = new GroupStats(group, time, client);
+            GroupStats current = new GroupStats(group, time / 1000, client);
+            time -= TIME_STEP;
             try {
                 if (time == 0 || group.isGenius()) {
                     System.out.println(group.isGenius());

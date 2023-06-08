@@ -15,6 +15,8 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
+import static com.teasgen.keyraces.client.Client.STYLES_FILE_PATH;
+
 public class MainViewController {
     @FXML
     public TextField serverAddressField;
@@ -55,7 +57,9 @@ public class MainViewController {
         controller.setViewModel(clientViewModel);
 
         Stage window = (Stage) playGame.getScene().getWindow();
-        window.setScene(new Scene(root, 1400, 1100));
+        Scene scene = new Scene(root, 1400, 1100);
+        scene.getStylesheets().add(Client.class.getResource(STYLES_FILE_PATH).toExternalForm());
+        window.setScene(scene);
     }
     @FXML
     public void handleAboutGameButton(ActionEvent actionEvent) { // TODO

@@ -28,13 +28,19 @@ public class GameViewController {
     private boolean lastMistake;
 
     private ClientViewModel viewModel;
-    @FXML
-    private void initialize() {
+    private void clearScene() {
         tryAgain.setVisible(false);
-        myText.setAlignment(Pos.TOP_LEFT);
+        myText.setAlignment(Pos.CENTER);
         inputText.clear();
         tableTimePreview.setText("Players");
         lastMistake = false;
+    }
+
+    @FXML
+    private void initialize() {
+        lastMistake = false;
+        tryAgain.setVisible(false);
+        myText.setAlignment(Pos.CENTER);
         inputText.textProperty().addListener((observableValue, oldValue, newValue) -> {
             if (newValue.length() > oldValue.length()) {
                 int curInx = newValue.length() - 1;
@@ -62,14 +68,21 @@ public class GameViewController {
                 remainTime.setText("");
                 tryAgain.setVisible(true);
                 warningsAboutText.setText("");
-                myText.setAlignment(Pos.valueOf("CENTER"));
+                myText.setAlignment(Pos.CENTER);
                 tableTimePreview.setText("Final table");
             }
         });
         tryAgain.setOnMouseClicked(event -> {
             viewModel.setWantTryAgain(true);
-            initialize();
+            clearScene();
         });
+        myText.textProperty().addListener(((observableValue, s, t1) -> {
+            if (t1 != null && !t1.startsWith("Starts in")
+                    && textLabel != null && !"Game over".equals(textLabel.getText()) && textLabel.getText() != null) {
+                myText.setAlignment(Pos.TOP_LEFT);
+                System.out.println("HERE: {" + t1 + "}{" + textLabel.getText() + "};");
+            }
+        }));
     }
 
     public void setViewModel(ClientViewModel viewModel) {
@@ -77,7 +90,15 @@ public class GameViewController {
         remainTime.textProperty().bindBidirectional(viewModel.timeProperty());
         table.textProperty().bind(viewModel.tableProperty());
         myText.textProperty().bind(viewModel.textProperty());
-        inputText.disableProperty().bind(viewModel.disabledProperty());
         textLabel.textProperty().bind(viewModel.endgameProperty());
+
+        inputText.disableProperty().bind(viewModel.disabledProperty());
+
+        inputText.visibleProperty().bind(viewModel.showAllProperty());
+        textLabel.visibleProperty().bind(viewModel.showAllProperty());
+        table.visibleProperty().bind(viewModel.showAllProperty());
+        remainTime.visibleProperty().bind(viewModel.showAllProperty());
+        tableTimePreview.visibleProperty().bind(viewModel.showAllProperty());
+        warningsAboutText.visibleProperty().bind(viewModel.showAllProperty());
     }
 }

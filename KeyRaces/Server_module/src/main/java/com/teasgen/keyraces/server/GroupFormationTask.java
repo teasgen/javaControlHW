@@ -17,18 +17,21 @@ public class GroupFormationTask extends TimerTask {
      * Current group
      */
     GroupServer.Group group;
+    Timer timer;
     /**
      * Just constructor
      * @param group instance of tracked group
      */
-    public GroupFormationTask(GroupServer.Group group) {
+    public GroupFormationTask(GroupServer.Group group, Timer timeToStart) {
         this.group = group;
+        this.timer = timeToStart;
     }
     /**
      * The action to be performed by this timer task.
      */
     @Override
     public void run() {
+        this.timer.cancel();
         group.close();
         group.sendMessageToAllMembers("5 seconds left: ", 1);
         InputStream inputStream = GroupServer.class.getResourceAsStream("/texts/text2");

@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class Client extends Application {
     private static final String FXML_FILE_PATH = "/main-view.fxml";
-    private static final String STYLES_FILE_PATH = "/style.css";
+    public static final String STYLES_FILE_PATH = "/style.css";
     private static final Object lock = new Object();
     private static final ClientViewModel clientViewModel = new ClientViewModel();
     private static final InitialViewModel initialViewModel = new InitialViewModel();
@@ -35,7 +35,7 @@ public class Client extends Application {
             ClientHandler clientHandler = new ClientHandler(
                     initialViewModel.getAddress(),
                     Integer.parseInt(initialViewModel.getPort()),
-                    initialViewModel.getName() + new Date(),
+                    initialViewModel.getName(),
                     clientViewModel
             );
 

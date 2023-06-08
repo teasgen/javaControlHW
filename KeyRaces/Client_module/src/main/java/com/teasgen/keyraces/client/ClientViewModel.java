@@ -1,9 +1,6 @@
 package com.teasgen.keyraces.client;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 public class ClientViewModel {
     private final StringProperty time = new SimpleStringProperty();
@@ -12,6 +9,7 @@ public class ClientViewModel {
     private final BooleanProperty disabled = new SimpleBooleanProperty();
     private final StringProperty endgame = new SimpleStringProperty();
     private final BooleanProperty wantTryAgain = new SimpleBooleanProperty();
+    private final BooleanProperty showAll = new SimpleBooleanProperty();
     private int totalNumber;
     private int errorsNumber;
     public ClientViewModel() {
@@ -20,6 +18,7 @@ public class ClientViewModel {
         errorsNumber = 0;
         disabled.set(true);
         wantTryAgain.set(false);
+        showAll.set(false);
     }
 
     public void setDisabled(Boolean disabled) {
@@ -89,12 +88,20 @@ public class ClientViewModel {
     public StringProperty endgameProperty() {
         return endgame;
     }
+    public void setShowAll(boolean showAll) {
+        this.showAll.set(showAll);
+    }
+
+    public BooleanProperty showAllProperty() {
+        return showAll;
+    }
     public void reset() {
         time.set("Soon start");
         totalNumber = 0;
         errorsNumber = 0;
         disabled.set(true);
         wantTryAgain.set(false);
+        showAll.set(false);
         table.set("");
         text.set("");
         endgame.set("Text");

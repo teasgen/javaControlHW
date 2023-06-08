@@ -3,6 +3,7 @@ Server sends:
     2 + GroupStats - table update during the game
     3 + GroupStats - final results
     4 + String - text
+    5 + String - time until game starts
 
 Client sends:
     String {name} - once, at the beginning
