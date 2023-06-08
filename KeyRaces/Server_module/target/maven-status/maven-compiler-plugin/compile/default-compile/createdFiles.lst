@@ -1,6 +1,7 @@
 com/teasgen/keyraces/server/GroupServer.class
 com/teasgen/keyraces/server/GroupServer$ClientStatisticsTimer.class
 module-info.class
+com/teasgen/keyraces/server/CheckConnectionTask.class
 com/teasgen/keyraces/server/GroupServer$ClientThread.class
 com/teasgen/keyraces/server/GroupFormationTask.class
 com/teasgen/keyraces/server/GroupStats.class

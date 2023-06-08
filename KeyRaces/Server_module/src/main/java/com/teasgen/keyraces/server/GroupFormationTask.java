@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.Timer;
 import java.util.TimerTask;
 
 /**
@@ -16,7 +17,6 @@ public class GroupFormationTask extends TimerTask {
      * Current group
      */
     GroupServer.Group group;
-
     /**
      * Just constructor
      * @param group instance of tracked group
@@ -31,7 +31,7 @@ public class GroupFormationTask extends TimerTask {
     public void run() {
         group.close();
         group.sendMessageToAllMembers("5 seconds left: ", 1);
-        InputStream inputStream = GroupServer.class.getResourceAsStream("/texts/text1");
+        InputStream inputStream = GroupServer.class.getResourceAsStream("/texts/text2");
         if (inputStream == null) {
             return;
         }
@@ -40,13 +40,13 @@ public class GroupFormationTask extends TimerTask {
         group.setTextLength(text.length());
         group.sendMessageToAllMembers(text, 4);
         try {
-            Thread.sleep(2000); // TODO: change THIS TIME
+            Thread.sleep(1000); // TODO: change THIS TIME
         } catch (InterruptedException e) {
             System.out.println("The server was disconnected");
         }
         group.setStartTime(new Date());
-        synchronized (group.lock) { // START THE GAME FOR THIS GROUP
-            group.lock.notifyAll();
-        }
+
+        for (GroupServer.ClientThread clientThread : group.getClients())
+            clientThread.setTimer();
     }
 }

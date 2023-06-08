@@ -1,13 +1,14 @@
 package com.teasgen.keyraces.client;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 
 public class Client extends Application {
     private static final String FXML_FILE_PATH = "/main-view.fxml";
@@ -15,7 +16,6 @@ public class Client extends Application {
     private static final Object lock = new Object();
     private static final ClientViewModel clientViewModel = new ClientViewModel();
     private static final InitialViewModel initialViewModel = new InitialViewModel();
-
     public static void main(String[] args) {
         Thread fxThread = new Thread(() -> Application.launch(Client.class, args));
         fxThread.start();
@@ -29,18 +29,29 @@ public class Client extends Application {
         }
 
         initialViewModel.fillBlankOrIncorrectValues();
-        ClientHandler clientHandler = new ClientHandler(
-                initialViewModel.getAddress(),
-                Integer.parseInt(initialViewModel.getPort()),
-                initialViewModel.getName(),
-                clientViewModel
-        );
+        while (fxThread.isAlive()) {
+            Platform.runLater(clientViewModel::reset);
+            System.out.println("New");
+            ClientHandler clientHandler = new ClientHandler(
+                    initialViewModel.getAddress(),
+                    Integer.parseInt(initialViewModel.getPort()),
+                    initialViewModel.getName() + new Date(),
+                    clientViewModel
+            );
 
-        clientHandler.start();
-        while (fxThread.isAlive()) {}
-        clientHandler.running = false;
+            clientHandler.start();
+            while (fxThread.isAlive() && !clientViewModel.wantTryAgainProperty().get()) {}
+            clientHandler.close();
+            System.out.println("Close");
+            if (fxThread.isAlive()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
-
     /**
      * @param stage the primary stage
      * @throws Exception if smth went wrong

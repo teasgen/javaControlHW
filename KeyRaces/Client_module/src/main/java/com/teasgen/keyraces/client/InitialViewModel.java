@@ -11,27 +11,16 @@ public class InitialViewModel {
     private final StringProperty port = new SimpleStringProperty();
     private final StringProperty name = new SimpleStringProperty();
     public InitialViewModel() {}
-    public void setAddress(String address) {
-        this.address.set(address);
-    }
 
     public StringProperty addressProperty() {
         return address;
     }
-    public void setPort(String port) {
-        this.port.set(port);
-    }
-
     public StringProperty portProperty() {
         return port;
     }
     public StringProperty nameProperty() {
         return name;
     }
-    public void setName(String name) {
-        this.name.set(name);
-    }
-
     public String getAddress() {
         return address.get();
     }

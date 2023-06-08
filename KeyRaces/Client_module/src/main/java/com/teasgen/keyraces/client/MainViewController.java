@@ -55,7 +55,7 @@ public class MainViewController {
         controller.setViewModel(clientViewModel);
 
         Stage window = (Stage) playGame.getScene().getWindow();
-        window.setScene(new Scene(root, 1400, 1000));
+        window.setScene(new Scene(root, 1400, 1100));
     }
     @FXML
     public void handleAboutGameButton(ActionEvent actionEvent) { // TODO

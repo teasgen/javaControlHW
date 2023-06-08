@@ -9,16 +9,24 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.*;
 
 public class ClientHandler extends Thread {
-    private final int port;
+    private final Integer port;
     private final String address;
     private final String name;
     public volatile boolean running;
+    private int timeToEnd = Integer.MIN_VALUE;
     private String text;
     private final ClientViewModel clientViewModel;
-    public ClientHandler(String address, int port, String name, ClientViewModel clientViewModel) {
+    private String currentWinner;
+    private int winnerSpeed;
+    Socket socket;
+    ObjectOutputStream out;
+    ObjectInputStream in;
+
+    public ClientHandler(String address, Integer port, String name, ClientViewModel clientViewModel) {
         this.address = address;
         this.port = port;
         this.name = name;
@@ -27,38 +35,54 @@ public class ClientHandler extends Thread {
     }
     @Override
     public void run() {
-        try (Socket socket = new Socket(this.address, this.port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())
-        ) {
+        try {
+            socket = new Socket(this.address, this.port);
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
             out.writeObject(this.name);
             out.flush();
-            while (this.running) {
-                int action = in.readInt();
-                switch (action) {
-                    case 1 -> System.out.println(in.readObject());
-                    case 2 -> {
-                        GroupStats groupStats = (GroupStats) in.readObject();
-                        System.out.println(groupStats.remainTime);
-                        out.writeObject(new ClientStats(
-                                clientViewModel.getTotalNumber(),
-                                clientViewModel.getErrorsNumber())
-                        );
-                        statsToViewModel(groupStats);
+            try {
+                while (this.running) {
+                    int action = in.readInt();
+                    switch (action) {
+                        case 1 -> {
+                            String message = (String) in.readObject();
+                            if (!"".equals(message))
+                                System.out.println(message);
+                        }
+                        case 2 -> {
+                            GroupStats groupStats = (GroupStats) in.readObject();
+                            System.out.println(groupStats.remainTime);
+                            out.writeObject(new ClientStats(
+                                    clientViewModel.getTotalNumber(),
+                                    clientViewModel.getErrorsNumber(),
+                                    1)
+                            );
+                            statsToViewModelDuringGame(groupStats);
+                        }
+                        case 3 -> {
+                            System.out.println("END GAME");
+                            GroupStats finalStats = (GroupStats) in.readObject();
+                            System.out.println(finalStats.names);
+                            statsToViewModelEndGame(finalStats);
+
+                            out.writeObject(new ClientStats(
+                                    clientViewModel.getTotalNumber(),
+                                    clientViewModel.getErrorsNumber(),
+                                    -1)
+                            );
+                        }
+                        case 4 -> {
+                            text = (String) in.readObject();
+                            Platform.runLater(() -> clientViewModel.setText(text));
+                        }
+                        default -> System.out.println("Wtf");
                     }
-                    case 3 -> {
-                        GroupStats finalStats = (GroupStats) in.readObject();
-                        System.out.println(finalStats.names);
-                        // TODO: send to GUI
-                    }
-                    case 4 -> {
-                        text = (String) in.readObject();
-                        Platform.runLater(() -> clientViewModel.setText(text));
-                    }
-                    default -> System.out.println("Wtf");
+                    if (action > 4 || action == 3)
+                        break;
                 }
-                if (action > 4 || action == 3)
-                    break;
+            } catch (SocketException e) {
+                System.out.println("The connection was lost");
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -68,37 +92,61 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private void statsToViewModel(GroupStats groupStats) {
-        int elapsedTime = (GroupServer.GAME_DURATION / 1000) - groupStats.remainTime;
+    private String formTable(GroupStats groupStats) {
+        Integer elapsedTime = (GroupServer.GAME_DURATION / 1000) - groupStats.remainTime;
         Set<ArrayList<Integer>> table = new TreeSet<>(new ArrayListComparator());
         for (int i = 0; i < groupStats.names.size(); ++i) {
+            if (groupStats.itsMe.get(i) && timeToEnd == Integer.MIN_VALUE && groupStats.totalCount.get(i) == groupStats.textLength)
+                timeToEnd = elapsedTime;
+            int curTime = timeToEnd == Integer.MIN_VALUE ? elapsedTime : timeToEnd;
+            System.out.println(elapsedTime + " " + curTime);
             if (groupStats.disconnected.get(i))
                 continue;
-            int correctNumber = groupStats.totalCount.get(i) - groupStats.errorCount.get(i);
+            int correctNumber = groupStats.totalCount.get(i);
             table.add(new ArrayList<>(Arrays.asList(
                     correctNumber,
                     groupStats.errorCount.get(i),
-                    elapsedTime == 0 ? 0 : (int) ((float) correctNumber / elapsedTime * 60),
+                    curTime == 0 ? 0 : (int) (((float) correctNumber / curTime) * 60),
                     i
             )));
         }
         StringBuilder res = new StringBuilder();
+        int i = 0;
         for (ArrayList<Integer> player : table) {
             int curInx = player.get(3);
+            if (i == 0) {
+                currentWinner = groupStats.itsMe.get(curInx) ? "I" : groupStats.names.get(curInx);
+                winnerSpeed = player.get(2);
+            }
             res.append(groupStats.itsMe.get(curInx) ? "Its me" : groupStats.names.get(curInx))
                     .append(" ")
-                    .append(String.format("%.2f", (float) player.get(0) / groupStats.textLength * 100))
+                    .append(String.format("%.2f", ((float) player.get(0) / groupStats.textLength) * 100))
                     .append("%, ")
                     .append(player.get(1))
                     .append(" mistakes, ")
                     .append(player.get(2))
                     .append(" sym/min\n");
+            ++i;
         }
-        System.out.println(res);
+        return res.toString();
+    }
+
+    private void statsToViewModelDuringGame(GroupStats groupStats) {
+        String res = formTable(groupStats);
         Platform.runLater(() -> {
             clientViewModel.setTime(String.valueOf(groupStats.remainTime));
-            clientViewModel.setTable(res.toString());
+            clientViewModel.setTable(res);
             clientViewModel.setDisabled(false);
+        });
+    }
+
+    private void statsToViewModelEndGame(GroupStats groupStats) {
+        String res = formTable(groupStats);
+        Platform.runLater(() -> {
+            clientViewModel.setTable(res);
+            clientViewModel.setDisabled(true);
+            clientViewModel.setEndgame("Game over");
+            clientViewModel.setText(currentWinner + " won the game with speed: " + winnerSpeed + " sym/min!");
         });
     }
 
@@ -110,6 +158,17 @@ public class ClientHandler extends Thread {
             if (first == second)
                 return list1.toString().compareTo(list2.toString());
             return Integer.compare(second, first);
+        }
+    }
+
+    public void close() {
+        running = false;
+        try {
+            out.close();
+            in.close();
+            socket.close();
+        } catch (IOException | NullPointerException e) {
+            System.out.println("Already closed");
         }
     }
 }
