@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.teasgen.keyraces.client.ClientHandlerTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s - in com.teasgen.keyraces.client.ClientHandlerTest

@@ -2,10 +2,7 @@ package com.teasgen.keyraces.server;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Class for waiting N seconds
@@ -18,6 +15,10 @@ public class GroupFormationTask extends TimerTask {
      */
     GroupServer.Group group;
     Timer timer;
+    InputStream inputStream;
+    List<String> textNames = new ArrayList<>();
+    Random random = new Random();
+    int waitingTime = 5000;
     /**
      * Just constructor
      * @param group instance of tracked group
@@ -25,6 +26,11 @@ public class GroupFormationTask extends TimerTask {
     public GroupFormationTask(GroupServer.Group group, Timer timeToStart) {
         this.group = group;
         this.timer = timeToStart;
+
+        textNames.add("text1");
+        textNames.add("text2");
+
+        inputStream = GroupServer.class.getResourceAsStream(getRandomTextPath());
     }
     /**
      * The action to be performed by this timer task.
@@ -34,22 +40,26 @@ public class GroupFormationTask extends TimerTask {
         this.timer.cancel();
         group.close();
         group.sendMessageToAllMembers("5 seconds left: ", 1);
-        InputStream inputStream = GroupServer.class.getResourceAsStream("/texts/text2");
-        if (inputStream == null) {
-            return;
-        }
-        String text = new Scanner(inputStream, StandardCharsets.UTF_8).useDelimiter("\\A").next();
+        String text = readTextFromInputStream();
         System.out.println(text);
         group.setTextLength(text.length());
         group.sendMessageToAllMembers(text, 4);
         try {
-            Thread.sleep(1000); // TODO: change THIS TIME
+            Thread.sleep(waitingTime); // TODO: change THIS TIME
         } catch (InterruptedException e) {
             System.out.println("The server was disconnected");
         }
-        group.setStartTime(new Date());
 
         for (GroupServer.ClientThread clientThread : group.getClients())
             clientThread.setTimer();
+    }
+    String readTextFromInputStream() {
+        try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
+            return scanner.useDelimiter("\\A").next();
+        }
+    }
+    String getRandomTextPath() {
+        int num = random.nextInt(textNames.size()) + 1;
+        return "/texts/text" + num;
     }
 }

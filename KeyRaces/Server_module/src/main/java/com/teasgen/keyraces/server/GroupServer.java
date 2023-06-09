@@ -8,8 +8,8 @@ import java.util.*;
 public class GroupServer {
     private static final int PORT = 5619;
     // TODO: change THIS TIME
-    public static final int GROUP_CREATION_TIME = 5_000; // 30 secs
-    public static final int GAME_DURATION = 15_000;      // 3 minutes
+    public static final int GROUP_CREATION_TIME = 30_000; // 30 secs
+    public static final int GAME_DURATION = 180_000;      // 3 minutes
     public static final int TIME_STEP = 1_000;         // 1 sec
     public volatile List<Group> groups;
     private static final Random rnd = new Random();
@@ -54,7 +54,6 @@ public class GroupServer {
             if (group.isOpened())
                 return group;
         }
-        System.out.println("kek get group");
         return null;
     }
 
@@ -171,7 +170,6 @@ public class GroupServer {
         private static final int MAX_CLIENTS = 3;
         private final List<ClientThread> clients;
         private volatile boolean opened;
-        private Date startTime;
         private int textLength;
         /**
          * true if all players have already written the text
@@ -245,9 +243,6 @@ public class GroupServer {
             this.genius = genius;
         }
 
-        public void setStartTime(Date startTime) {
-            this.startTime = startTime;
-        }
     }
     public class ClientStatisticsTimer extends TimerTask {
         GroupServer.ClientThread client;

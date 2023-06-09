@@ -3,4 +3,5 @@ open module com.teasgen.keyraces.client {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
+
 }

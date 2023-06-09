@@ -17,7 +17,6 @@ public class ClientHandler extends Thread {
     private final String address;
     private final String name;
     public volatile boolean running;
-//    private int timeToEnd = Integer.MIN_VALUE;
     private final ArrayList<Integer> timeToEnd = new ArrayList<>();
     private String text;
     private final ClientViewModel clientViewModel;
@@ -101,7 +100,7 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private String formTable(GroupStats groupStats) {
+    String formTable(GroupStats groupStats) {
         Integer elapsedTime = (GroupServer.GAME_DURATION / 1000) - groupStats.remainTime;
         Set<ArrayList<Integer>> table = new TreeSet<>(new ArrayListComparator());
         for (int i = 0; i < groupStats.names.size(); ++i) {
