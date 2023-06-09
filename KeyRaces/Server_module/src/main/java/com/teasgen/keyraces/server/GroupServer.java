@@ -122,13 +122,14 @@ public class GroupServer {
                     if (clientStats.time() == -1) {
                         running = false;
                         System.out.println("Client " + playerName + " was disconnected");
-                        group.removeClient(this);
-                        if (group.isEmpty()) {
-                            groups.remove(group);
-                        } else {
-                            group.sendMessageToAllMembers("The player " + this.playerName + " from your group was disconnected", 1);
+                        synchronized (group.clients) {
+                            group.removeClient(this);
+                            if (group.isEmpty()) {
+                                groups.remove(group);
+                            } else {
+                                group.sendMessageToAllMembers("The player " + this.playerName + " from your group was disconnected", 1);
+                            }
                         }
-                        System.out.println("Groups: ");
                         break;
                     }
                 }
@@ -259,12 +260,14 @@ public class GroupServer {
          * @param code    the code associated with the message
          */
         public void sendMessageToAllMembers(String message, int code) {
-            for (ClientThread clientThread : clients) {
-                try {
-                    clientThread.out.writeInt(code);
-                    clientThread.out.writeObject(message);
-                } catch (IOException | NullPointerException e) {
-                    System.out.println("Connection to " + clientThread.playerName + " was lost");
+            synchronized (clients) {
+                for (ClientThread clientThread : clients) {
+                    try {
+                        clientThread.out.writeInt(code);
+                        clientThread.out.writeObject(message);
+                    } catch (IOException | NullPointerException e) {
+                        System.out.println("Connection to " + clientThread.playerName + " was lost");
+                    }
                 }
             }
         }

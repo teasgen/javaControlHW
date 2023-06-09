@@ -41,7 +41,7 @@ public class GroupFormationTask extends TimerTask {
     public void run() {
         this.timer.cancel();
         group.close();
-        group.sendMessageToAllMembers("5 seconds left: ", 1);
+        group.sendMessageToAllMembers("5 seconds left", 1);
         String text = readTextFromInputStream();
         group.setTextLength(text.length());
         group.sendMessageToAllMembers(text, 4);

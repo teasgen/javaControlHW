@@ -14,7 +14,10 @@ public class InitialViewModel {
     private final StringProperty address = new SimpleStringProperty();
     private final StringProperty port = new SimpleStringProperty();
     private final StringProperty name = new SimpleStringProperty();
-    public InitialViewModel() {}
+    private boolean start;
+    public InitialViewModel() {
+        start = false;
+    }
 
     public StringProperty addressProperty() {
         return address;
@@ -58,5 +61,13 @@ public class InitialViewModel {
 
         if (getName() == null)
             name.set(NAME);
+    }
+
+    public boolean isStart() {
+        return start;
+    }
+
+    public void setStart(boolean start) {
+        this.start = start;
     }
 }

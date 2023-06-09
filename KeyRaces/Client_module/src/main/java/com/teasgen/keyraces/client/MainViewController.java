@@ -59,9 +59,7 @@ public class MainViewController {
      */
     @FXML
     public void handlePlayButton(ActionEvent actionEvent) throws Exception {
-        synchronized (lock) {
-            lock.notifyAll();
-        }
+        initialViewModel.setStart(true);
         URL url = Client.class.getResource(GAME_FXML_PATH);
         if (url == null) {
             throw new IllegalStateException("Cannot find '" + GAME_FXML_PATH + "'");

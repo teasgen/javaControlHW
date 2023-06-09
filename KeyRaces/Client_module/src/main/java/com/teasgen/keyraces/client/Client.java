@@ -31,16 +31,10 @@ public class Client extends Application {
         Thread fxThread = new Thread(() -> Application.launch(Client.class, args));
         fxThread.start();
 
-        // Wait until the user press game button
-        synchronized (lock) {
-            try {
-                lock.wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        while (fxThread.isAlive() && !initialViewModel.isStart()) {
+            // Wait until the user press game button
         }
 
-        // Perform client initialization and handle connection
         initialViewModel.fillBlankOrIncorrectValues();
         while (fxThread.isAlive()) {
             Platform.runLater(clientViewModel::reset);
