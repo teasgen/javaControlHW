@@ -8,6 +8,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 
+/**
+ * The controller for the game view.
+ * Handles user interactions and updates the view based on the view model.
+ */
 public class GameViewController {
     @FXML
     public Label remainTime;
@@ -28,6 +32,10 @@ public class GameViewController {
     private boolean lastMistake;
 
     private ClientViewModel viewModel;
+
+    /**
+     * Reset the scene to its initial state
+     */
     private void clearScene() {
         tryAgain.setVisible(false);
         myText.setAlignment(Pos.CENTER);
@@ -36,6 +44,10 @@ public class GameViewController {
         lastMistake = false;
     }
 
+    /**
+     * Initializes the game view controller.
+     * Sets up event handlers and binds properties between the view and the view model.
+     */
     @FXML
     private void initialize() {
         lastMistake = false;
@@ -48,7 +60,7 @@ public class GameViewController {
                     if (!lastMistake)
                         viewModel.increaseErrorsNumber();
                     lastMistake = true;
-                    warningsAboutText.setText("YOU MADE A MISTAKE!");
+                    warningsAboutText.setText("YOU'VE MADE A MISTAKE!");
                 }
                 else {
                     lastMistake = false;
@@ -80,11 +92,16 @@ public class GameViewController {
             if (t1 != null && !t1.startsWith("Starts in")
                     && textLabel != null && !"Game over".equals(textLabel.getText()) && textLabel.getText() != null) {
                 myText.setAlignment(Pos.TOP_LEFT);
-                System.out.println("HERE: {" + t1 + "}{" + textLabel.getText() + "};");
+//                System.out.println("HERE: {" + t1 + "}{" + textLabel.getText() + "};");
             }
         }));
     }
 
+    /**
+     * Sets the view model for the game view.
+     * According to MVVM binds view model properties to the GUI properties
+     * @param viewModel the view model to be set
+     */
     public void setViewModel(ClientViewModel viewModel) {
         this.viewModel = viewModel;
         remainTime.textProperty().bindBidirectional(viewModel.timeProperty());

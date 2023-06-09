@@ -12,7 +12,12 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.*;
 
+/**
+ * Handles the client-side communication with the server.
+ * Manages the connection, sends/receives data, and updates the client's view model.
+ */
 public class ClientHandler extends Thread {
+
     private final Integer port;
     private final String address;
     private final String name;
@@ -26,6 +31,14 @@ public class ClientHandler extends Thread {
     ObjectOutputStream out;
     ObjectInputStream in;
 
+    /**
+     * Constructs a ClientHandler object.
+     *
+     * @param address        the server address
+     * @param port           the server port
+     * @param name           the client name
+     * @param clientViewModel the view model for the client
+     */
     public ClientHandler(String address, Integer port, String name, ClientViewModel clientViewModel) {
         this.address = address;
         this.port = port;
@@ -35,6 +48,11 @@ public class ClientHandler extends Thread {
         for (int i = 0; i < 3; ++i)
             timeToEnd.add(Integer.MIN_VALUE);
     }
+
+    /**
+     * The main logic of the client handler.
+     * Handles communication with the server, receives data, and updates the client's view model accordingly.
+     */
     @Override
     public void run() {
         try {
@@ -54,7 +72,6 @@ public class ClientHandler extends Thread {
                         }
                         case 2 -> {
                             GroupStats groupStats = (GroupStats) in.readObject();
-                            System.out.println(groupStats.remainTime);
                             out.writeObject(new ClientStats(
                                     clientViewModel.getTotalNumber(),
                                     clientViewModel.getErrorsNumber(),
@@ -81,7 +98,6 @@ public class ClientHandler extends Thread {
                         }
                         case 5 -> {
                             text = (String) in.readObject();
-                            System.out.println(text);
                             Platform.runLater(() -> clientViewModel.setText("Starts in " + text + " seconds"));
                         }
                         default -> System.out.println("Wtf");
@@ -93,13 +109,21 @@ public class ClientHandler extends Thread {
                 System.out.println("The connection was lost");
             }
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("The connection was lost");
+            System.out.println("""
+                    This server is unavailable now.
+                    Please reboot the application with correct values
+                    ie: Address={localhost}, port={5619}""");
         } finally {
             running = false;
         }
     }
 
+    /**
+     * Formats the group stats into a table string.
+     *
+     * @param groupStats the group statistics
+     * @return the formatted table string
+     */
     String formTable(GroupStats groupStats) {
         Integer elapsedTime = (GroupServer.GAME_DURATION / 1000) - groupStats.remainTime;
         Set<ArrayList<Integer>> table = new TreeSet<>(new ArrayListComparator());
@@ -138,6 +162,11 @@ public class ClientHandler extends Thread {
         return res.toString();
     }
 
+    /**
+     * Updates the client's view model during the game phase.
+     *
+     * @param groupStats the group statistics during the game
+     */
     private void statsToViewModelDuringGame(GroupStats groupStats) {
         String res = formTable(groupStats);
         Platform.runLater(() -> {
@@ -147,6 +176,11 @@ public class ClientHandler extends Thread {
         });
     }
 
+    /**
+     * Updates the client's view model at the end of the game.
+     *
+     * @param groupStats the final group statistics
+     */
     private void statsToViewModelEndGame(GroupStats groupStats) {
         String res = formTable(groupStats);
         Platform.runLater(() -> {
@@ -157,6 +191,9 @@ public class ClientHandler extends Thread {
         });
     }
 
+    /**
+     * Custom comparator for sorting ArrayLists in descending order.
+     */
     static class ArrayListComparator implements Comparator<ArrayList<Integer>> {
         @Override
         public int compare(ArrayList<Integer> list1, ArrayList<Integer> list2) {
@@ -168,6 +205,9 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Closes the client handler and releases any resources used.
+     */
     public void close() {
         running = false;
         try {

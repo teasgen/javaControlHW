@@ -2,6 +2,10 @@ package com.teasgen.keyraces.client;
 
 import javafx.beans.property.*;
 
+/**
+ * The view model for the client application.
+ * It holds properties and methods to manage the client's view state.
+ */
 public class ClientViewModel {
     private final StringProperty time = new SimpleStringProperty();
     private final StringProperty table = new SimpleStringProperty();
@@ -12,6 +16,10 @@ public class ClientViewModel {
     private final BooleanProperty showAll = new SimpleBooleanProperty();
     private int totalNumber;
     private int errorsNumber;
+    /**
+     * Constructs a new instance of the ClientViewModel class.
+     * Initializes the initial state of the view model.
+     */
     public ClientViewModel() {
         time.set("Soon start");
         totalNumber = 0;
@@ -95,6 +103,9 @@ public class ClientViewModel {
     public BooleanProperty showAllProperty() {
         return showAll;
     }
+    /**
+     * Resets the view model to its initial state.
+     */
     public void reset() {
         time.set("Soon start");
         totalNumber = 0;

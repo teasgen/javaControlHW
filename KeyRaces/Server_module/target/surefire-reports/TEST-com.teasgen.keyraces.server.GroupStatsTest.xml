@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.teasgen.keyraces.server.GroupStatsTest" time="0.047" tests="2" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.teasgen.keyraces.server.GroupStatsTest" time="0.044" tests="2" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/home/vlad/.jdks/corretto-17.0.5/lib"/>
-    <property name="sun.java.command" value="org.apache.maven.surefire.booter.ForkedBooter /home/vlad/workspace/Java_Projects/KeyRaces/Server_module/target/surefire 2023-06-09T13-26-40_375-jvmRun1 surefire5629354576437217189tmp surefire_05507597826665807499tmp"/>
+    <property name="sun.java.command" value="org.apache.maven.surefire.booter.ForkedBooter /home/vlad/workspace/Java_Projects/KeyRaces/Server_module/target/surefire 2023-06-09T15-15-30_081-jvmRun1 surefire16875467078879000737tmp surefire_015936765703057335537tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/vlad/workspace/Java_Projects/KeyRaces/Server_module/target/test-classes:/home/vlad/.m2/repository/org/junit/jupiter/junit-jupiter/5.9.2/junit-jupiter-5.9.2.jar:/home/vlad/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/home/vlad/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/vlad/.m2/repository/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar:/home/vlad/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/vlad/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.9.2/junit-jupiter-params-5.9.2.jar:/home/vlad/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/home/vlad/.m2/repository/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -53,6 +53,6 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="testGroupStatsConstructorWithNullGroup" classname="com.teasgen.keyraces.server.GroupStatsTest" time="0.025"/>
-  <testcase name="testGroupStatsInitialization" classname="com.teasgen.keyraces.server.GroupStatsTest" time="0.004"/>
+  <testcase name="testGroupStatsConstructorWithNullGroup" classname="com.teasgen.keyraces.server.GroupStatsTest" time="0.023"/>
+  <testcase name="testGroupStatsInitialization" classname="com.teasgen.keyraces.server.GroupStatsTest" time="0.005"/>
 </testsuite>

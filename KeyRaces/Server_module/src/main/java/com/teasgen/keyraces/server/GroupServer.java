@@ -5,19 +5,31 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
+/**
+ * The GroupServer class represents a server that manages groups and clients for a key racing game.
+ * It handles client connections, group formation, client communication, and game statistics.
+ */
 public class GroupServer {
     private static final int PORT = 5619;
     // TODO: change THIS TIME
     public static final int GROUP_CREATION_TIME = 30_000; // 30 secs
     public static final int GAME_DURATION = 180_000;      // 3 minutes
-    public static final int TIME_STEP = 1_000;         // 1 sec
+    public static final int TIME_STEP = 1_000;            // 1 sec
     public volatile List<Group> groups;
     private static final Random rnd = new Random();
     private static final Object lock = new Object();
 
+    /**
+     * Constructs a GroupServer object.
+     * Initializes the list of groups.
+     */
     public GroupServer() {
         groups = new ArrayList<>();
     }
+    /**
+     * Starts the GroupServer by creating a server socket and accepting client connections.
+     * Manages the formation of groups and starts the client threads.
+     */
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("The server was started at port " + PORT);
@@ -46,7 +58,7 @@ public class GroupServer {
     }
 
     /**
-     * find which group new client can be connected
+     * Finds which group new client can be connected to
      * @return group if there are some unfilled groups, otherwise null
      */
     public Group getAvailableGroup() {
@@ -69,6 +81,9 @@ public class GroupServer {
         return null;
     }
 
+    /**
+     * The ClientThread class represents a thread for handling client communication and game statistics.
+     */
     public class ClientThread extends Thread {
         private String playerName;
         private final Socket clientSocket;
@@ -78,9 +93,17 @@ public class GroupServer {
         private ObjectInputStream in;
         private ObjectOutputStream out;
         private final Timer sendStats = new Timer();
+        /**
+         * Constructs a ClientThread object with the specified client socket.
+         *
+         * @param clientSocket the client socket
+         */
         public ClientThread(Socket clientSocket) {
             this.clientSocket = clientSocket;
         }
+        /**
+         * Executes the client thread's logic for handling communication and game statistics.
+         */
         @Override
         public void run() {
             try {
@@ -96,7 +119,6 @@ public class GroupServer {
                     ClientStats clientStats = (ClientStats) in.readObject();
                     totalCnt = clientStats.totalNumber();
                     errorCnt = clientStats.errorsNumber();
-                    System.out.println(totalCnt + " " + errorCnt + " " + clientStats.time());
                     if (clientStats.time() == -1) {
                         running = false;
                         System.out.println("Client " + playerName + " was disconnected");
@@ -107,10 +129,6 @@ public class GroupServer {
                             group.sendMessageToAllMembers("The player " + this.playerName + " from your group was disconnected", 1);
                         }
                         System.out.println("Groups: ");
-                        for (Group group1 : groups) {
-                            for (ClientThread clientThread : group1.clients)
-                                System.out.println(clientThread.playerName);
-                        }
                         break;
                     }
                 }
@@ -122,9 +140,15 @@ public class GroupServer {
                 close();
             }
         }
+        /**
+         * Sets up the timer for sending countdown time.
+         */
         public void setTimer() {
             sendStats.schedule(new ClientStatisticsTimer(this), 0, TIME_STEP);
         }
+        /**
+         * Closes the input/output streams and the client socket.
+         */
         public void close() {
             try {
                 out.close();
@@ -135,11 +159,13 @@ public class GroupServer {
             }
         }
 
+        /**
+         * Removes the client from the group and handles disconnection.
+         */
         private void remove() {
             running = false;
             System.out.println("Client " + playerName + " was disconnected");
             Group group = getClientGroup(this);
-            System.out.println("kek remove");
             if (group == null)
                 return;
             group.removeClient(this);
@@ -166,16 +192,23 @@ public class GroupServer {
         }
     }
 
+    /**
+     * The Group class represents a group of clients playing together.
+     */
     public class Group {
         private static final int MAX_CLIENTS = 3;
         private final List<ClientThread> clients;
         private volatile boolean opened;
         private int textLength;
         /**
-         * true if all players have already written the text
-         * otherwise false
+         * True if all players have already written the text
+         * Otherwise false
          */
         private boolean genius;
+        /**
+         * Constructs a Group object.
+         * Initializes the list of clients and sets the group as opened.
+         */
         public Group() {
             clients = new ArrayList<>();
             opened = true;
@@ -198,6 +231,12 @@ public class GroupServer {
         public boolean isFull() {
             return clients.size() == MAX_CLIENTS;
         }
+        /**
+         * Adds a client to the group.
+         * If the group is full, it will be closed for new clients.
+         *
+         * @param client the client to add
+         */
         public synchronized void addClient(ClientThread client) {
             if (!opened)
                 throw new IllegalStateException();
@@ -205,9 +244,20 @@ public class GroupServer {
             if (isFull())
                 opened = false;
         }
+        /**
+         * Removes a client from the group.
+         *
+         * @param client the client to remove
+         */
         public void removeClient(ClientThread client) {
             clients.remove(client);
         }
+        /**
+         * Sends a message to all members of the group.
+         *
+         * @param message the message to send
+         * @param code    the code associated with the message
+         */
         public void sendMessageToAllMembers(String message, int code) {
             for (ClientThread clientThread : clients) {
                 try {
@@ -244,6 +294,9 @@ public class GroupServer {
         }
 
     }
+    /**
+     * The ClientStatisticsTimer class is responsible for sending client statistics at regular intervals.
+     */
     public class ClientStatisticsTimer extends TimerTask {
         GroupServer.ClientThread client;
         int time;
@@ -253,7 +306,7 @@ public class GroupServer {
         }
 
         /**
-         * The action to be performed by this timer task.
+         * Executes the timer task by sending client statistics to the associated client.
          */
         @Override
         public void run() {
@@ -266,7 +319,6 @@ public class GroupServer {
             time -= TIME_STEP;
             try {
                 if (time == 0 || group.isGenius()) {
-                    System.out.println(group.isGenius());
                     client.out.writeInt(3);
                     client.out.writeObject(current);
                     client.out.flush();

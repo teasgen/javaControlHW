@@ -34,6 +34,8 @@ public class GroupFormationTask extends TimerTask {
     }
     /**
      * The action to be performed by this timer task.
+     * Choose new text randomly and sends it to the group
+     * Then waiting 5 seconds and starts the game for all players
      */
     @Override
     public void run() {
@@ -41,7 +43,6 @@ public class GroupFormationTask extends TimerTask {
         group.close();
         group.sendMessageToAllMembers("5 seconds left: ", 1);
         String text = readTextFromInputStream();
-        System.out.println(text);
         group.setTextLength(text.length());
         group.sendMessageToAllMembers(text, 4);
         try {
@@ -53,11 +54,19 @@ public class GroupFormationTask extends TimerTask {
         for (GroupServer.ClientThread clientThread : group.getClients())
             clientThread.setTimer();
     }
+
+    /**
+     * @return File input stream
+     */
     String readTextFromInputStream() {
         try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
             return scanner.useDelimiter("\\A").next();
         }
     }
+
+    /**
+     * @return path to new text
+     */
     String getRandomTextPath() {
         int num = random.nextInt(textNames.size()) + 1;
         return "/texts/text" + num;
